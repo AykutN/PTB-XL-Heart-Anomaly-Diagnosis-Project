@@ -1,0 +1,19 @@
+# ECG Classification Project Requirements
+# Install with: pip install -r requirements.txt
+
+# Core data science
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Machine learning
+scikit-learn>=1.3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Signal processing (optional, for raw ECG data)
+wfdb>=4.1.0
+
+# Utilities
+tqdm>=4.65.0
