@@ -70,9 +70,11 @@ EKG kayıtları, beş tanısal üst sınıfa gruplandırılmış SCP-ECG standar
 
 Veri seti önemli bir sınıf dengesizliği sergilemekte olup, NORM tüm kayıtların neredeyse yarısını temsil ederken HYP yalnızca %6,1'ini oluşturmaktadır. NORM ve HYP sınıfları arasındaki dengesizlik oranı 7,27:1'dir.
 
+PTB-XL veri setinin demografik ve tanısal özellikleri Şekil 1'de görselleştirilmiştir. Veri seti, yaş açısından 40-80 yaş aralığında yoğunlaşan ve ortalama 62.8 yıl olan bir kardiyak hasta popülasyonunu temsil etmektedir. Cinsiyet dağılımı neredeyse dengeli olup (erkek %52.1, kadın %47.9), boy ve kilo ölçümleri normal dağılım göstermektedir. En kritik gözlem, tanısal sınıflar arasındaki belirgin dengesizlik ve eksik değerlerin sistem misiniz büyüklüğüdür. Özellikle, P dalgası ile ilgili öznitelikler (P_On_Global, P_Off_Global, P_Dur_Global) ve elektrod sorunları göstergesi gibi kalite göstergelerine ait eksik değerler, atriyal fibrilasyon ve teknik kayıt sorunları gibi klinik nedenlerden kaynaklanmaktadır.
+
 ![Veri Seti Genel Görünümü](../eda/ptbxl_plus_overview.png)
 
-*Şekil 1: PTB-XL veri seti genel görünümü: (a) tanısal üst sınıf dağılımı, (b) sınıfa göre yaş dağılımı, (c) eksik değer analizi, (d) öznitelik korelasyon yapısı.*
+*Şekil 1: PTB-XL veri setinin (n=21.799) kapsamlı genel görünümü. (a) Tanısal üst sınıf dağılımı: NORM (normal EKG) çoğunluğu (%44.5) oluştururken, HYP (hipertrofi) azınlık sınıfıdır (%6.1). (b) Yaş dağılımı: Ortalama 62.8±32.3 yıl, sağa çarpık dağılım (40-80 yaş hegemonyası). (c) Cinsiyet dağılımı: Neredeyse eşit (erkek 11.354, kadın 10.445). (d) Boy dağılımı: Normal dağılım, ortalama 166.7 cm. (e) Kilo dağılımı: Normal dağılım, ortalama 71.0 kg. (f) Eksik değer analizi: elektrod sorunları (~94.4%), infark aşaması (~93.5%), pacemaker varlığı (~88.9%) ve P dalgası parametreleri (P_On, P_Off, P_Dur: ~%8.2) en yüksek eksik oranlarına sahiptir. Bu eksik değerler, sistem kayıt kalitesi ve klinik fizyoloji (ör. atriyal fibrilasyonda P dalgası tespit edilemez) ile bağlantılıdır.*
 
 ### 2.3 Eğitim/Doğrulama/Test Bölünmesi
 

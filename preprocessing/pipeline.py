@@ -62,6 +62,7 @@ print("="*60)
 
 before = len(df)
 df = df.dropna(subset=["label"])
+#! here we droped the NaN values. why? -ib
 after = len(df)
 
 print(f"  Removed: {before - after} rows ({(before-after)/before*100:.2f}%)")

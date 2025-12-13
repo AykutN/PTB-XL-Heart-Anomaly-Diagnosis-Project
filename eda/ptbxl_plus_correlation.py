@@ -53,7 +53,7 @@ def main() -> None:
         square=True,
         cbar_kws={"label": "Pearson correlation"},
     )
-    ax.set_title("PTB-XL+ 12SL Global Feature Correlation")
+    ax.set_title("PTB-XL+ 12SL Global Özellik Korelasyonu")
     plt.tight_layout()
     heatmap_path = fig_dir / "ptbxl_plus_global_corr_heatmap.png"
     fig.savefig(heatmap_path, dpi=200)
