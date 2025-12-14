@@ -160,6 +160,32 @@ PTB-XL+ özniteliklerindeki eksik değerler, rastgele veri toplama sorunlarında
 ```
 Son öznitelikler = Orijinal öznitelikler (empüte edilmiş) + Eksik gösterge bayrakları
 ```
+#### 3.1.3 Eksik Değer İşleme
+
+PTB-XL+ özniteliklerindeki eksik değerler, rastgele veri toplama sorunlarından ziyade fizyolojik nedenlerden kaynaklanmaktadır. Satır bazlı eksik veri analizi, veri setindeki satırların yalnızca çok küçük bir bölümünde anlamlı eksiklik olduğunu göstermiştir; maksimum satır bazlı eksik oranı %0,90 olup, %50'den fazla, %25'den fazla veya %10'dan fazla eksik değere sahip hiçbir satır bulunmamıştır. Bu nedenle satır silme işlemi uygulanmamıştır ve veri setinin bütünlüğü korunmuştur.
+
+**Tablo 5: Eksik Değer Analizi**
+
+| Öznitelik | Eksik % | Klinik Neden |
+|-----------|---------|--------------|
+| P_On_Global | %8,24 | P dalgası tespit edilemez (ör. atriyal fibrilasyon) |
+| P_Off_Global | %8,24 | P dalgası tespit edilemez |
+| P_Dur_Global | %8,24 | P dalgası tespit edilemez |
+| PR_Int_Global | %8,05 | PR aralığı ölçülemez |
+| P_AxisFront_Global | %8,14 | P aksı belirsiz |
+| HR_Atrial_Global | %7,05 | Atriyal hız belirsiz |
+
+![Eksik Değer Analizi](../figures/missing_values_analysis.png)
+
+*Şekil 4: (a) En yüksek eksik orana sahip öznitelikler, (b) kategori bazında eksik değer dağılımı. P dalgası ile ilgili öznitelikler, atriyal fibrilasyon gibi durumlarda tespit edilemeyen P dalgaları nedeniyle daha yüksek eksik oranlara sahiptir.*
+
+**Hibrit Yaklaşım:**
+1. **Eksik göstergeler**: Klinik açıdan anlamlı eksik değerler için ikili bayraklar oluşturulmuştur
+2. **Medyan empütasyonu**: Veri sızıntısını önlemek için yalnızca eğitim verileri üzerinde fit edilmiştir
+
+```
+Son öznitelikler = Orijinal öznitelikler (empüte edilmiş) + Eksik gösterge bayrakları
+```
 
 #### 3.1.4 Öznitelik Ölçekleme
 
