@@ -7,15 +7,59 @@
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{xcolor}
+
+% --- Title page logos (top-left / top-right) ---
+% --- Title page logos (top-left / top-right) ---
+\usepackage{tikz}
+% Reusable logos row
+\newcommand{\IULogos}[1]{%
+	\begin{minipage}{\linewidth}
+		\includegraphics[height=#1]{IU-LOGO.png}%
+		\hfill%
+		\includegraphics[height=#1]{IUfen-LOGO.png}%
+	\end{minipage}%
+}
+
+% Title page (top)
+\titlegraphic{%
+	\vspace*{-1cm}%
+	\IULogos{2cm}%
+}
+
+% Last slide (bottom) automatically
+\addtobeamertemplate{background canvas}{}{%
+	\ifnum\insertframenumber=\inserttotalframenumber\relax
+		\begin{tikzpicture}[remember picture,overlay]
+			\node[anchor=south west,xshift=0.5cm,yshift=0.3cm] at (current page.south west)
+				{\includegraphics[height=2cm]{IU-LOGO.png}};
+			\node[anchor=south east,xshift=-0.5cm,yshift=0.3cm] at (current page.south east)
+				{\includegraphics[height=2cm]{IUfen-LOGO.png}};
+		\end{tikzpicture}%
+	\fi
+}
 
 \title{Kalp Anomalilerinin Denetimli Öğrenme ile Sınıflandırılması}
-\author{M. Yusuf Aykut\\İbrahim Abu Shawish\\Samet Ertuğrul Kurum\\Samet Baturay}
+\author{\textbf{İstanbul Üniversitesi, Fen Fakültesi, Bilgisayar Bilimleri Bölümü}\\M. Yusuf Aykut\\İbrahim Abu Shawish\\Samet Ertuğrul Kurum\\Samet Baturay}
 \date{Aralık 2025}
+% --- Green main template / accent color ---
+\definecolor{MainGreen}{HTML}{2E7D32}
+
+\setbeamercolor{structure}{fg=MainGreen}
+\setbeamercolor{frametitle}{bg=MainGreen, fg=white}
+\setbeamercolor{title}{fg=MainGreen}
+
+% Optional: blocks
+\setbeamercolor{block title}{bg=MainGreen, fg=white}
+\setbeamercolor{block body}{bg=MainGreen!5, fg=black}
+
+% Optional: hyperlinks
+\hypersetup{colorlinks=true, linkcolor=MainGreen, urlcolor=MainGreen, citecolor=MainGreen}
 
 \begin{document}
 
 \begin{frame}
-		\titlepage
+  \titlepage
 \end{frame}
 
 %---------------------------------
@@ -49,7 +93,7 @@
 \section{Literatür Taraması}
 
 \begin{frame}{Literatürden Örnek Çalışma 1}
-		extbf{[1]} PTB-XL ve Georgia ECG veri setlerinde, sol ventriküler hipertrofi (LVH) tespiti:
+		\textbf{[1]} PTB-XL ve Georgia ECG veri setlerinde, sol ventriküler hipertrofi (LVH) tespiti:
 	\begin{itemize}
 		\item Yalnızca NORMAL ve LVH etiketli kayıtlar kullanılmış, düşük kaliteli sinyaller elenmiştir.
 		\item Özellik çıkarımı araştırmacılar tarafından yapılmış; Logistic Regresyon, Rastgele Orman (RF) ve Destek Vektör Makinesi (SVM) denenmiştir.
@@ -60,7 +104,7 @@
 \end{frame}
 
 \begin{frame}{Literatürden Örnek Çalışma 2}
-		extbf{[2]} Miyokardiyal Enfarktüs tespiti için klasik ML ve CNN karşılaştırması:
+		\textbf{[2]} Miyokardiyal Enfarktüs tespiti için klasik ML ve CNN karşılaştırması:
 	\begin{itemize}
 		\item 7 klasik model: KNN, SVM, RF, XGBoost, Decision Tree, Gaussian Naive Bayes vb.
 		\item Eksik verilerde \texttt{SimpleImputer}, ağaç dışı modellerde \texttt{StandardScaler} kullanılmıştır.
@@ -71,7 +115,7 @@
 \end{frame}
 
 \begin{frame}{Literatürden Örnek Çalışma 3}
-		extbf{[4]} PhysioNet/CinC 2020 Challenge, 12 derivasyonlu EKG ve XGBoost:
+		\textbf{[4]} PhysioNet/CinC 2020 Challenge, 12 derivasyonlu EKG ve XGBoost:
 	\begin{itemize}
 		\item Çoklu etiket problemi için her etiket için ayrı bir ikili XGBoost modeli eğitilmiştir.
 		\item Sınıf dengesizliği: undersampling + K-fold çapraz doğrulama ile ele alınmıştır.
@@ -101,11 +145,6 @@
 		\item Cinsiyet: %52.1 erkek, %47.9 kadın.
 		\item Veri çerçevesi: 21.388 kayıt, 793 sütun (750 sayısal, 42 tamsayı, 1 kategorik).
 	\end{itemize}
-\end{frame}
-
-\begin{frame}{Figür 1: Veri Seti Genel Görünüm}
-	\centering
-	\resizebox{0.95\linewidth}{!}{\includegraphics{../eda/dataset_overview.png}}
 \end{frame}
 
 \begin{frame}{Sınıf Dağılımları ve Dengesizlik}
@@ -150,9 +189,14 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Figür 1: Eksik Değer Analizi}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../reports/missing_data_analysis/missing_values_barplot.png}}
+\end{frame}
+
 \begin{frame}{Figür 2: Eksik Değer Analizi}
 	\centering
-	\resizebox{0.95\linewidth}{!}{\includegraphics{../figures/missing_values_analysis.png}}
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../reports/missing_data_analysis/missingness_diagnosis_heatmap_paper.png}}
 \end{frame}
 
 \begin{frame}{Eksik Veri Stratejisi}
@@ -191,8 +235,10 @@
 
 \begin{frame}{Figür 3: Splitlere Göre Sınıf Dağılımı}
 	\centering
-	\resizebox{0.98\linewidth}{!}{\includegraphics{../figures/class_distribution_splits.png}}
+	\resizebox{0.98\linewidth}{!}{\includegraphics{../reports/data_summary/class_distribution_splits.png}}
 \end{frame}
+
+
 
 \begin{frame}{Sınıf Dengesizliği}
 	\begin{itemize}
@@ -206,6 +252,16 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Sınıf Dengesizliği (Devam)}
+	\begin{itemize}
+		\item oversampling yöntemleri (SMOTE, ADASYN vb.) denenmiş ancak başarılı sonuçlar elde edilmemiştir.
+		\begin{itemize}
+			\item Çoklu sınıf yapısı ve yüksek boyutlu öznitelik uzayı nedeniyle sentetik örnekler gerçekçi değildir.
+			\item veri sayısını değiştirmedeğitilen modeller oversampling ile aynı aynı sayılabilecek performans göstermiştir.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
 \subsection{Öznitelik Seçimi}
 
 \begin{frame}{Öznitelik Seçimi: Varyans Eşikleme}
@@ -215,6 +271,13 @@
 		\item Böylece bilgi katkısı sınırlı, durağan ve gürültülü özellikler modelleme dışına alınmıştır.
 	\end{itemize}
 \end{frame}
+
+%C:\Users\Pc\Desktop\LOCALS\ML_PTB-XL\PTB-XL-Heart-Anomaly-Diagnosis-Project\reports\feature_selection\variance_histogram.png
+\begin{frame}{Figür 3: Varyans Dağılımı}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../reports/feature_selection/variance_histogram.png}}
+\end{frame}
+
 
 \begin{frame}{Öznitelik Seçimi: Random Forest Önem Skorları}
 	\begin{itemize}
@@ -226,9 +289,26 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Figür 4: Öznitelik Seçimi Özeti}
+\begin{frame}{Figür 4: Öznitelik Seçimi ve Önem Düzeyleri}
 	\centering
-	\resizebox{0.95\linewidth}{!}{\includegraphics{../preprocessing/feature_selection_analysis.png}}
+	\begin{columns}
+		\begin{column}{0.48\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=\linewidth]{../reports/feature_selection/correlation_heatmap_top100_variance.png}
+				\caption{Top-100 Öznitelik Korelasyon Isı Haritası filtreleme öncesi (varyanslı)}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=\linewidth]{../reports/feature_selection/rf_importance_top30_final.png}
+				\caption{RF Model Bazlı Önem Düzeyleri}
+			\end{figure}
+		\end{column}
+	\end{columns}
+	\vspace{0.5cm}
+	\footnotesize{Not: En yüksek skora sahip öznitelikler (Top-50, Top-100, Top-200) seçilerek model eğitiminde kullanılmıştır.}
 \end{frame}
 
 \subsection{Model Seçimi ve Eğitim}
@@ -269,9 +349,8 @@
 \begin{frame}{Kodlama Ortamı}
 	\begin{itemize}
 		\item Tüm analiz ve deneyler Python 3 ortamında, açık kaynak kütüphaneler kullanılarak gerçekleştirilmiştir.
-		\item Bağımlılıklar \texttt{requirements.txt} ile yönetilmiştir: \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{matplotlib}, \texttt{seaborn}, \texttt{tqdm} (opsiyonel: \texttt{wfdb}).
+		\item Bağımlılıklar \texttt{requirements.txt} ile yönetilmiştir: \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{matplotlib}, \texttt{seaborn}.
 		\item Deney akışı modülerleştirilmiştir: ön işleme hattı (\texttt{preprocessing/pipeline.py}), model eğitimi ve metrik/çizimler (\texttt{training/train\_models.py}), makale figürleri (\texttt{figures/generate\_figures.py}).
-		\item Tekrarlanabilirlik için veri bölme ve modelleme adımlarında sabit tohum (\texttt{random\_state=42}) kullanılmış; dönüşümler yalnızca eğitim setinde fit edilerek veri sızıntısı engellenmiştir.
 		\item Kod ve deney çıktıları sürüm kontrolü ile yönetilmiş ve herkese açık repo olarak paylaşılmıştır: \href{https://github.com/AykutN/PTB-XL-Heart-Anomaly-Diagnosis-Project}{github.com/AykutN/PTB-XL-Heart-Anomaly-Diagnosis-Project}
 	\end{itemize}
 \end{frame}
@@ -281,10 +360,10 @@
 
 \begin{frame}{Genel Performans (Eğitim / Val)}
 	\begin{itemize}
-		\item RF + Top-50: Accuracy %55.33, Precision %67.64, Recall %76.53, F1 %71.53, ROC-AUC 0.904.
-		\item RF + Top-100: Accuracy %58.43, Precision %71.29, Recall %73.68, F1 %72.39, ROC-AUC 0.909.
-		\item RF + Top-200: Accuracy %58.85, Precision %71.30, Recall %75.60, F1 %73.21, ROC-AUC 0.915.
-		\item RF + Top-200 + Ensemble: Recall artarken (yaklaşık %78.6), doğruluk ve precision bir miktar düşmüş; F1 kazancı sınırlı kalmıştır.
+		\item RF + Top-50: Accuracy \%55.33, Precision \%67.64, Recall \%76.53, F1 \%71.53, ROC-AUC 0.904.
+		\item RF + Top-100: Accuracy \%58.43, Precision \%71.29, Recall \%73.68, F1 \%72.39, ROC-AUC 0.909.
+		\item RF + Top-200: Accuracy \%58.85, Precision \%71.30, Recall \%75.60, F1 \%73.21, ROC-AUC 0.915.
+		\item RF + Top-200 + Ensemble: Recall artarken (yaklaşık \%78.6), doğruluk ve precision bir miktar düşmüş; F1 kazancı sınırlı kalmıştır.
 	\end{itemize}
 \end{frame}
 
@@ -298,11 +377,11 @@
 
 \begin{frame}{Sınıf Bazlı Sonuçlar (CW-200)}
 	\begin{itemize}
-		\item NORM: Eşik 0.30; Precision %79.27, Recall %92.11, F1 %85.21.
-		\item MI: Eşik 0.45; Precision %74.91, Recall %72.73, F1 %73.80.
-		\item STTC: Eşik 0.46; Precision %69.24, Recall %79.08, F1 %73.84.
-		\item CD: Eşik 0.45; Precision %76.87, Recall %70.36, F1 %73.47.
-		\item HYP: Eşik 0.43; Precision %56.23, Recall %63.74, F1 daha düşük seviyededir.
+		\item NORM: Eşik 0.30; Precision \%79.27, Recall \%92.11, F1 \%85.21.
+		\item MI: Eşik 0.45; Precision \%74.91, Recall \%72.73, F1 \%73.80.
+		\item STTC: Eşik 0.46; Precision \%69.24, Recall \%79.08, F1 \%73.84.
+		\item CD: Eşik 0.45; Precision \%76.87, Recall \%70.36, F1 \%73.47.
+		\item HYP: Eşik 0.43; Precision \%56.23, Recall \%63.74, F1 daha düşük seviyededir.
 	\end{itemize}
 \end{frame}
 
@@ -322,7 +401,7 @@
 
 \begin{frame}{Figür 5: ROC Eğrileri (Random Forest - Top-200)}
 	\centering
-	\resizebox{0.95\linewidth}{!}{\includegraphics{../results/roc_curves_RandomForest_top200.png}}
+	\resizebox{0.70\linewidth}{!}{\includegraphics{../reports/model_comparison/roc_curves_final.png}}
 \end{frame}
 
 %=================================
@@ -358,22 +437,68 @@
 		\item HYP performansını artırmak için alt sınıf (ör. LVH/RVH) düzeyinde daha homojen etiketleme ve ek vektörkardiyografik özniteliklerin değerlendirilmesi.
 	\end{itemize}
 \end{frame}
-
 %=================================
 \section{Referanslar}
 
-\begin{frame}{Referanslar}
-	\small
-	\begin{thebibliography}{9}
-		\bibitem{ptbxl-scidata}
-		P. Wagner, N. Strodthoff, R. Bousseljot, \emph{PTB-XL, a large publicly available electrocardiography dataset}, Scientific Data, 7, 154 (2020).
+\begin{frame}[allowframebreaks]{Referanslar}
+	\scriptsize
+	\setlength{\parskip}{2pt}
+	\setbeamertemplate{bibliography item}{\insertbiblabel}
 
-		\bibitem{physionet-ptbxl}
-		PhysioNet, \emph{PTB-XL: A Large Annotated ECG Dataset}.\\
-		\url{https://physionet.org/content/ptb-xl/}
+	\begin{thebibliography}{99}
 
-		\bibitem{cardiodat}
-		R. Bousseljot, D. Kreiseler, A. Schnabel, \emph{Nutzung der EKG-Signaldatenbank CARDIODAT der PTB über das Internet}, Biomedizinische Technik, 40(S1), 317--318 (1995).
+		\bibitem{wagner2020-ptbxl}
+		P. Wagner, N. Strodthoff, R.-D. Bousseljot, D. Kreiseler, F. I. Lunze, W. Samek, T. Schaeffter,
+		\emph{PTB-XL, a large publicly available electrocardiography dataset},
+		Scientific Data, 7, 154 (2020).
+		\url{https://doi.org/10.1038/s41597-020-0495-6}
+
+		\bibitem{wagner2023-ptbxlplus}
+		P. Wagner, T. Mehari, N. Strodthoff, et al.,
+		\emph{PTB-XL+, a comprehensive electrocardiographic feature dataset},
+		Scientific Data (2023).
+		\url{https://doi.org/10.1038/s41597-023-02153-8}
+
+		\bibitem{strodthoff2020-benchmarks}
+		N. Strodthoff, P. Wagner, T. Schaeffter, W. Samek,
+		\emph{Deep learning for ECG analysis: Benchmarks and insights from PTB-XL},
+		arXiv preprint arXiv:2004.13701 (2020).
+		\url{https://arxiv.org/abs/2004.13701}
+
+		\bibitem{breiman2001-rf}
+		L. Breiman,
+		\emph{Random forests},
+		Machine Learning, 45(1), 5--32 (2001).
+		\url{https://doi.org/10.1023/A:1010933404324}
+
+		\bibitem{guyon2003-feature-selection}
+		I. Guyon, A. Elisseeff,
+		\emph{An introduction to variable and feature selection},
+		Journal of Machine Learning Research, 3, 1157--1182 (2003).
+
+		\bibitem{jolliffe2016-pca-review}
+		I. T. Jolliffe, J. Cadima,
+		\emph{Principal component analysis: A review and recent developments},
+		Philosophical Transactions of the Royal Society A, 374(2065), 20150202 (2016).
+
+		\bibitem{strobl2007-rf-importance-bias}
+		C. Strobl, A.-L. Boulesteix, A. Zeileis, T. Hothorn,
+		\emph{Bias in random forest variable importance measures: Illustrations, sources and a solution},
+		BMC Bioinformatics, 8, 25 (2007).
+		\url{https://doi.org/10.1186/1471-2105-8-25}
+
+		\bibitem{rubin1976-missing-data}
+		D. B. Rubin,
+		\emph{Inference and missing data},
+		Biometrika, 63(3), 581--592 (1976).
+		\url{https://doi.org/10.1093/biomet/63.3.581}
+
+		\bibitem{sterne2009-multiple-imputation}
+		J. A. C. Sterne, I. R. White, J. B. Carlin, M. Spratt, P. Royston, M. G. Kenward, J. R. Carpenter,
+		\emph{Multiple imputation for missing data in epidemiological and clinical research: Potential and pitfalls},
+		BMJ, 338, b2393 (2009).
+		\url{https://doi.org/10.1136/bmj.b2393}
+
 	\end{thebibliography}
 \end{frame}
 
