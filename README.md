@@ -1,6 +1,6 @@
 # PTB-XL ECG Classification Project
 
-Multi-class ECG classification using machine learning on the PTB-XL dataset.
+Multi-class ECG classification using machine learning on the PTB-XL dataset, focusing on handling missing data, feature selection, and class imbalance.
 
 ## Project Structure
 
@@ -10,53 +10,32 @@ Machine Learning IU/
 │   └── paper.md                 # Scientific report (Turkish)
 │
 ├── data/
-│   └── processed/               # Preprocessed data
-│       ├── X_train.csv         # Training features
-│       ├── X_val.csv           # Validation features
-│       ├── X_test.csv          # Test features
-│       ├── y_train.csv         # Training labels
-│       ├── y_val.csv           # Validation labels
-│       ├── y_test.csv          # Test labels
-│       ├── class_weights.csv   # Computed class weights
-│       ├── feature_names.csv   # Feature names
-│       └── selected/           # Selected feature sets
-│           ├── X_train_top50.csv
-│           ├── X_train_top100.csv
-│           ├── X_train_top200.csv
-│           └── ...
+│   └── processed/               # Preprocessed data (train/val/test splits)
 │
-├── eda/
-│   ├── metadata.py             # Basic EDA on PTB-XL metadata
-│   ├── ptbxl_plus_eda.py       # EDA on PTB-XL+ features
-│   ├── ptbxl_plus_overview.png
-│   ├── clinical_features_by_class.png
-│   ├── distributions.png
-│   └── top_diagnoses.png
+├── reports/
+│   ├── feature_selection/       # Feature selection plots and lists
+│   ├── missing_data_analysis/   # Missing data visualizations
+│   └── model_comparison/        # Model performance plots (ROC, Precision/Recall)
 │
-├── figures/
-│   ├── generate_figures.py     # Figure generation script
-│   ├── preprocessing_pipeline.png
-│   ├── class_distribution_splits.png
-│   ├── missing_values_analysis.png
-│   ├── class_weights.png
-│   └── feature_selection_summary.png
+├── results/                     # CSV results of model experiments
 │
-├── preprocessing/
-│   ├── pipeline.py             # Main preprocessing pipeline
-│   ├── feature_selection.py    # Feature selection & extraction
-│   └── feature_selection_analysis.png
+├── src/
+│   ├── analysis/                # Analysis scripts
+│   │   ├── missing_data_analysis.py
+│   │   ├── feature_selection_rf.py
+│   │   └── ...
+│   ├── modeling/                # Modeling scripts
+│   │   ├── 06_train_models.py
+│   │   ├── 08_threshold_optimization.py
+│   │   ├── 11_advanced_experiments.py
+│   │   └── 12_balanced_rf.py
+│   └── preprocessing/           # Data cleaning and splitting scripts
 │
-├── training/
-│   └── train_models.py         # Model training script
+├── ptb-xl/                      # Raw PTB-XL dataset
+├── ptb-xl+/                     # PTB-XL+ feature dataset
 │
-├── models/                     # Saved trained models (after training)
-├── results/                    # Evaluation results (after training)
-│
-├── ptb-xl/                     # Raw PTB-XL dataset
-├── ptb-xl+/                    # PTB-XL+ feature dataset
-│
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+├── requirements.txt             # Python dependencies
+└── README.md                    # This file
 ```
 
 ## Setup
@@ -70,112 +49,59 @@ Machine Learning IU/
    - PTB-XL: https://physionet.org/content/ptb-xl/1.0.3/
    - PTB-XL+: https://physionet.org/content/ptb-xl-plus/1.0.1/
 
-## Usage
+## Pipeline & Usage
+
+The project follows a sequential pipeline. Scripts are located in `src/`.
 
 ### 1. Preprocessing
-
-Run the preprocessing pipeline to clean data and extract features:
-
-```bash
-python preprocessing/pipeline.py
-```
-
-This will:
-- Load PTB-XL metadata and PTB-XL+ features
-- Extract diagnostic labels
-- Handle missing values (hybrid approach)
-- Split data into train/val/test
-- Apply StandardScaler normalization
-- Save processed data
+- **Merge & Label:** Merges PTB-XL metadata with PTB-XL+ features and assigns diagnostic superclasses.
+- **Clean & Split:** Drops irrelevant columns, handles missing data (flagging + imputation), and splits into Train/Val/Test.
 
 ### 2. Feature Selection
+- **Variance Threshold:** Removes low-variance features (< 0.05).
+- **Random Forest Importance:** Selects Top-50, Top-100, and Top-200 features based on importance scores.
 
-Run feature selection to reduce dimensionality:
+### 3. Modeling
+- **Standard Random Forest:** Baseline model with class weights.
+- **Ensemble Undersampling:** 50-seed ensemble with undersampling for majority classes.
+- **Balanced Random Forest:** Uses `imblearn` for balanced bootstrapping.
+- **Threshold Optimization:** Optimizes classification thresholds per class to maximize F1 score.
 
-```bash
-python preprocessing/feature_selection.py
-```
+## Methodology
 
-This will:
-- Remove highly correlated features
-- Compute mutual information and random forest importance
-- Create top 50/100/200 feature sets
-- Perform PCA analysis
-- Generate visualization
-
-### 3. Generate Figures
-
-Create figures for the report:
-
-```bash
-python figures/generate_figures.py
-```
-
-### 4. Train Models
-
-Train and evaluate classifiers:
-
-```bash
-python training/train_models.py
-```
-
-This will:
-- Train Decision Tree, Naive Bayes, and SVM
-- Perform hyperparameter tuning with grid search
-- Evaluate on test set
-- Save models and results
-
-## Dataset
-
-### PTB-XL
-
-- 21,799 clinical 12-lead ECG recordings
-- 18,869 unique patients
-- 10-second recordings at 100/500 Hz
-- Labeled with SCP-ECG codes
-
-### Diagnostic Classes
-
-| Class | Description | Count | Percentage |
-|-------|-------------|-------|------------|
-| NORM | Normal ECG | 9,514 | 44.5% |
-| MI | Myocardial Infarction | 5,424 | 25.4% |
-| STTC | ST/T Change | 2,817 | 13.2% |
-| CD | Conduction Disturbance | 2,325 | 10.9% |
-| HYP | Hypertrophy | 1,308 | 6.1% |
-
-## Methods
-
-### Preprocessing
-- Missing value handling: Hybrid approach (median imputation + missing indicators)
-- Feature scaling: StandardScaler (fit on training data only)
-- Class imbalance: Weighted learning
+### Missing Data Handling
+- **Analysis:** Identified that missingness in P-wave features is correlated with MI and STTC classes (MNAR).
+- **Strategy:** Instead of dropping rows, missing values were imputed with 0 (for signal absence) or median, and binary flags (`is_missing_*`) were added to preserve the information of "missingness".
 
 ### Feature Selection
-- Correlation filtering (>0.95)
-- Mutual Information
-- Random Forest importance
-- Combined ranking
+- **VarianceThreshold:** Removed 186 features with variance < 0.05.
+- **Random Forest Importance:** Selected the top 200 features from the remaining set. PCA was avoided to maintain interpretability.
 
-### Classification Algorithms
-1. **Decision Tree**: Interpretable, feature importance
-2. **Gaussian Naive Bayes**: Fast, probabilistic
-3. **SVM**: Effective in high dimensions
+### Class Imbalance Handling
+- **Class Weighting:** Assigning higher weights to minority classes (HYP, CD).
+- **Ensemble Undersampling:** Training multiple models on balanced subsets to reduce bias towards the majority class (NORM).
+- **Balanced Random Forest:** Automatically balances bootstrap samples.
 
-### Evaluation Metrics
-- Accuracy
-- Macro/Weighted F1-Score
-- Per-class Precision/Recall
-- Confusion Matrix
-- ROC-AUC
+### Models Evaluated
+1. **Random Forest (Baseline)**
+2. **Random Forest + Class Weights**
+3. **Random Forest + Ensemble Undersampling**
+4. **Balanced Random Forest**
 
 ## Results
 
-*To be completed after model training*
+The best performance was achieved using **Balanced Random Forest** with **Top-200 features** and **Threshold Optimization**.
+
+| Model | Accuracy | Precision | Recall | F1 Score | ROC-AUC |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Standard RF | 58.85% | 71.30% | 75.60% | 73.21% | 0.915 |
+| **Balanced RF** | **60.94%** | **73.66%** | **77.08%** | **75.29%** | **0.925** |
+
+*Note: Metrics are macro-averaged.*
 
 ## Report
 
-The scientific report (in Turkish) is available at `Article/paper.md`.
+The detailed scientific report (in Turkish) is available at `Article/paper.md`.
 
 ## References
 
