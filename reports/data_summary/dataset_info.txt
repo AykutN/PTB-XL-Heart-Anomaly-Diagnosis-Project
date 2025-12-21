@@ -1,0 +1,5 @@
+<class 'pandas.core.frame.DataFrame'>
+Index: 21388 entries, 1 to 21837
+Columns: 800 entries, patient_id to HYP
+dtypes: bool(1), float64(759), int64(32), object(8)
+memory usage: 130.6+ MB

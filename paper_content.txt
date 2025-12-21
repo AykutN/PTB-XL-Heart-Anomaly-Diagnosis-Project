@@ -1,0 +1,617 @@
+Kalp Anomalilerinin Denetimli Öğrenme
+ile Sınıflandırılması
+M. Yusuf Aykut, İbrahim Abu Shawish, Samet Ertuğrul Kurum, Samet Baturay
+
+1.​Giriş
+Elektrokardiyografi (EKG), kalp hastalıklarının erken ve doğru teşhisinde
+kritik önemlidir. EKG, kalbin ürettiği elektriksel sinyaller sayesinde aktivitesinin
+kaydedilmesini olanaklı kılar. EKG Sinyali kalbin aktivitesi ve morfolojik yapısına
+dair bilgiler içermektedir. Böylece kalpte miyokard, ritim veya iletim ile ilgili
+patolojilerin tespiti mümkün olur. Yakın gelecekte, klinik kullanımda yapay zeka ve
+makine öğrenmesi uygulamalarının pek çok hastalığın erken ve hızlı teşhisinde
+doktorlara yardımcı olarak kullanılması kaçınılmazdır ve bu alanda pek çok çalışma
+yapılmaya devam edilmektedir.
+EKG sinyalinden dalga formlarının süreleri, genlikleri ve kalp hızı
+değişkenliği
+
+gibi
+
+metrikler
+
+üretilerek,
+
+makine
+
+öğrenmesi
+
+uygulamalarının
+
+geliştirilmesi için öznitelikler çıkarılabilir. Bu çalışmada EKG sinyalinden çıkarılmış
+özniteliklerden oluşan PTB-XL+ veri seti kullanılarak normal ve 4 farklı anomali
+sınıfına karşılık gelen hastalıkların tespit edilmesi için makine öğrenmesi
+süreçlerinin uygulanması amaçlanmaktadır.
+
+2.​Literatür Taraması
+Literatürde hem klasik makine öğrenmesi hem de derin öğrenme modellerini
+kullanan çalışmalar bulunmaktadır. Çalışmalardan birisi [1, link], PTB-XL veri
+setinde bulunan 5 adet üst sınıftan yalnızca hipertrofi (HYP)’in bir alt sınıfı olan sol
+ventriküler hipertrofi tespitine odaklanılmıştır. Çalışmada, 2181 adet sol ventriküler
+hipertrofi etiketli veri varken, 9000 adet normal ECG verisi, Georgia ECG veri setiyle
+birlikte değerlendirilmeye sokulmuştur. PTB-XL veri setinden özellikleri kendileri
+çıkarmışlar ve Logistic Regresyon, Rastgele Ağaçlar(RF) ve Destek Vektör
+Makinesi(SVM) yöntemlerini uygulamışlardır. RF ve SVM yöntemleri %87 üzerinde
+duyarlılık (sensitivity) ve özgüllük(specificity) sağlamıştır. Bu çalışmanın dengesiz
+veri setleri açısından sınıf dengesizliği problemini çözmek amacıya, dengesiz olan
+sınıfa ‘down-sampling’ (daha fazla örneğe sahip olan sınıfı daha az olan sınıfın
+
+örnek sayısına indirerek veri azaltma) uygulamışlardır. Ancak bu veri kaybına yol
+açtığı için rastgele şekilde bu veri indirmeyi gerçekleştirdikleri 100 adet eğitim
+yapmışlar ve bu farklı eğitilmiş modellerin sonuçlarının ortalamasını çalışmanın
+metriği olarak sunmuşlardır (bkz. Ensemble Random Forest, SVM and LogReg
+modelleri) ​
+​
+​
+
+Başka bir çalışma[2, link], Miyokardiyal Enfarktüs tespiti için sinyalden
+
+çıkarılmış özniteliklerle eğitilen klasik makine öğrenmesi modelleri ile ham sinyal
+verisini konvolüsyonel ağlara besleyen iki farklı modelin karşılaştırmasını yapmıştır.
+Bu çalışmada 7 adet klasik makine öğrenimi modeli eğitim için kullanılmıştır: KNN,
+SVM, Random Forest, XGBoost, Decision Tree, Gaussian Naive Bias. Eksik veriler
+için scikit-learn kütüphanesinin Simple Imputer metodunu kullanmışlardır. Random
+Forest ve Decision Tree harici modeller için de Standard Scaler kullanılmıştır. Bunun
+sebebi ağaç tabanlı modellerin ölçek duyarsız olmasıdır. Yani ağaçlar ayrımı “bu
+özellik X’den büyük mü?” gibi eşikler üzerinden tanımlar bu açıdan kullanılmaması
+mantıklıdır. PTB-XL’den sadece NORM ve MI etiketli, 100 Hz örneklemeli 12-lead
+ECG’ler alınmış; veri, MI örnekleri referans alınarak 70/15/15 (train/val/test)
+bölünmüş. Eğitim seti iki sınıfta dengelenmiş, validasyon ve test ise orijinal dağılımı
+korumuş. Ortalama doğruluk oranında en yüksek model %89 ile XGBoost olmuştur.
+sonrasında %88 ile SVM ve RandomForest modelleri gelmektedir. XGBoost
+modelinin duyarlılığı ve özgüllüğü de %88’dir.
+Başka bir çalışma [4, link], PhysioNet/CinC 2020 Challenge yarışmasında ki 12
+lead EKG verilerini kullanarak çıkarılan öznitelikler ile XGBoost modelini
+değerlendirmiştir. Çalışmada, çoklu etiket problemini çözmek için yarışmadaki
+hastalık sınıflarının her biri için ayrı birer binary XGBoost modeli eğitilmiştir. Yani
+tüm etiketlere tek bir model oluşturmak yerine her etiket icin ayri ayri modeller
+olusturmuslar. Sinif dengesizliğini çözmek için de undersampling yani fazla olan
+verileri silerek siniflari eşitlemişler, ancak veri kaybını tolere etmek ve sonuclari
+saglamlastirmak icin K-fold cross validation yapmişlardir. Yani sadece bir kez
+train/test yapmak yerine veriyi n parçaya bölüp n kez dönüşümlü kullanmışlardır.
+Modelin ürettiği olasılık değerinin 0.9 gibi bir eşik değerini gecmesi sarti
+konulmustur ve bazi durumlarda bu eşik her hastalik icin ozel olarak ayarlanmıştır.
+Sonuç olarak model, yarışmadan 0.155 puanlık bir 'Challenge Skoru' elde etmiştir.
+Bu skorla, 0.533 puan alan kazanan modelin gerisinde kalarak, sıralamaya giren 41
+takım arasında 24. sırada yer almışlardır.​
+
+[3, link]
+[4, link]
+[5, link]
+
+3.​Yöntem
+2.1 Veri Setinin Tanımlanması ve Analizi
+PTB‑XL+, PTB‑XL’in 12 derivasyonlu EKG dalga formlarından üç farklı analiz
+aracının (GE Marquette 12SL, University of Glasgow Uni‑G ve açık kaynak ECGDeli)
+çıkardığı öznitelikleri, median vuruşları ve fidüsyal noktaları içeren tamamlayıcı bir
+veri setidir. Öznitelikler; süreler, genlikler, segment başlangıç/bitişleri ve alanlar
+(Uni‑G’de vektörkardiyografik ölçümler dahil) gibi klinik olarak yorumlanabilir
+tanımlayıcıları kapsar. Veri seti ayrıca 12SL’nin otomatik tanı ifadelerini ve hem
+12SL hem de PTB‑XL etiketlerinin SNOMED CT’ye eşlenmiş sürümlerini sağlar;
+böylece modellerin klinisyen etiketleri ile otomatik ifadeler arasında karşılaştırmalı
+olarak eğitilip değerlendirilebilmesine olanak tanır [PTB‑XL+ (Methods, Data
+Records, Technical Validation)].
+PTB-XL
+
+veri
+
+setinin
+
+demografik
+
+ve
+
+tanısal
+
+özellikleri,
+
+Figür
+
+1’de
+
+görselleştirilmiştir. Yaş bakımından 40-80 yaş aralığında yoğunlaşan ve ortalama 62.8
+yıl olan bir hasta popülasyonunu temsil etmektedir. Hastaların %52.1’si erkekler
+oluştururken %47.9’i kadınlar oluşturmaktadır, Ortalma kilo 71.0 KG, Ortalama yaş
+62.8’dir (Std: 32.3), Ortalama boy ise 166.7 cm’dir. bunlar demografik bilgiler olarak
+yer almıştır.​
+​
+Eksik değerlerde hem demografik verilerden hem de EKG sinyal verilerinden
+eksikler bulunmaktadır. Ancak bu verilerin çoğunluğu demografik verilerdeki
+eksikliktir. EKG sinyalinden çıkarılan özniteliklerden 6 adedindeki eksiklik
+örneklerin %10’undan azken geri kalan özniteliklerde eksik verilerin miktarı %5’ten
+azdır.​
+PTB-XL veri seti, 18869 farklı hastadan 10 saniye uzunluklarla toplanan 21799
+klinik 12 kanallı EKG kaydı içermektedir. Dalga dosyalarının 500 Hz ve 100 Hz
+
+sürümleri mevcuttur. Bu kayıtlardan 9514 adedi normal (sağlıklı) EKG iken, 12285
+adedi hastalıklıdır.
+EKG kayıtları 5 farklı üst sınıfta kategorileşmiştir. Normal EKG(%43),
+Miyokard Enfarktüsü (%25), ST/T Değişikliği (%24), İletim Bozukluğu (%22),
+Hipertrofi(%12) şeklinde dağılıma sahiptir. Bir kayıt birden fazla anomali tanısı
+alabilmektedir.
+Class
+
+Name
+
+Count
+
+Percentage
+
+NORM
+
+Normal ECG
+
+9,514
+
+44.5%
+
+MI
+
+Myocardial Infarction
+
+5,424
+
+25.4%
+
+STTC
+
+ST/T Change
+
+2,817
+
+13.2%
+
+CD
+
+Conduction Disturbance
+
+2,325
+
+10.9%
+
+HYP
+
+Hypertrophy
+
+1,308
+
+6.1%
+
+Tablo 1. Sınıf Dağılımları
+Sınıfların dağılımı incelendiğinde veri setinde belirgin bir sınıf dengesizliği olduğu
+görülmektedir. Normal EKG veri setinin yaklaşık yarısını oluştururken, Hipertrofi
+örneklerin yalnızca %12’sinde var olarak etiketlenmiştir. Bu durum, makine
+öğrenmesi modellerinin eğitim aşamasında normal EKG verilerini daha iyi
+öğrenirken, hipertrofi gibi az örneğe sahip sınıfların öğrenememesine sebep olabilir.
+Bu veri dengesizliği ön işleme, eğitim ve test aşamalarında doğru anlaşılmaz ve
+önlem alınmazsa modelde gerçeği yansıtmayan başarım metrikleriyle karşılaşılabilir. ​
+​
+Bu dengesizlik problemi ve çok etiketli yapının getirdiği zorluklar, Ön İşleme
+bölümünde ele alınacaktır. Sınıf dengesizliğini gidermek için ağırlıklı kayıp
+fonksiyonları (weighted loss), aşırı/eksik örnekleme (oversampling/undersampling)
+teknikleri
+
+ve
+
+stratejik
+
+değerlendirilecektir.
+
+veri
+
+artırma
+
+(data
+
+augmentation)
+
+yöntemleri
+
+Figür 1. İlk 10 özniteliğin eksik örnek yüzdeliğini gösteren grafik.
+
+2.2 Ön İşleme
+Ön işleme, model eğitilmeden önce hedef değişkenin belirlenmesinde önemli
+olacak özniteliklere göre verilerin, normalizasyonunu, standardizasyonunu, eksik
+veri doldurma ya da eksik/aykırı veri çıkarmayı, veri dönüşümünü, öznitelik
+çıkarımı ve öznitelik seçimi gibi aşamaları içerir. Bu aşamaların probleme göre
+mantıklı ve açıklanabilir olduğu durumda uygulanması beklenir. Bu çalışmada
+yapılan ön işleme aşamaları adım adım açıklanmaktadır.
+​
+​
+
+Başlangıç olarak PTB-XL veri setinde klinik üst bilgileri içeren veritabanı
+
+dosyası ile EKG sinyallerinden çıkarılan 12-lead özellikleri barındıran veri dosyası
+ecg_id anahtarı kullanılarak birleştirilmiştir. Ardından, her bir kaydın tanı
+etiketleri, SCP-ECG standartlarına göre tanımlanmış 5 ana teşhis sınıfına (Normal,
+MI, ST/T Değişikliği, İletim Bozukluğu, Hipertrofi) dönüştürülmüştür. Bu dönüşüm
+sonucunda, herhangi bir tanı sınıfına girmeyen veya etiketi bulunmayan 411 kayıt
+
+tespit edilerek analiz dışı bırakılmış ve çalışma seti örnek sayısı 21,388 kayıt olarak
+güncellenmiştir.
+​
+
+Demografik veriler: Hastaların boy (height) bilgisinde %67.65 ve kilo (weight)
+
+bilgisinde %56.21 oranında eksiklik bulunmaktadır. Bu değişkenlerdeki yüksek
+eksiklik
+
+oranından
+
+dolayı
+
+model
+
+eğitiminde
+
+kullanılmamıştır ve
+
+veriden
+
+çıkarılmıştır.
+​
+
+EKG verisi: T_AxisFront_Global ve R_AxisFrontal_Global etiketlerinde
+
+toplam 5 adet örneğin verisi eksiktir, bunlar silinmiştir.
+P_On_Global,
+P_Off_Global, P_Dur_Global, P_AxisFront_Global, PR_Int_Global,
+HR_Atrial_Global,Öznitelikleri yaklaşık %8 eksik veri barındırmaktadır. Bu
+eksikliklerin çoğu P dalgasında bulunmaktadır ve bu durum atriyal fibrilasyon gibi
+P dalgasının görülmediği veya belirsiz olduğu durumlardan kaynaklanıyor olabilir.
+Dolayısıyla bu verilere medyan imputasyon uygulamanın yanı sıra, eksik veri
+barındıran örneklere ikili(binary) bayrak eklenmiştir.
+​
+
+Satır bazlı eksik veri analizi, veri setindeki satırların yalnızca çok küçük bir
+
+bölümünde anlamlı eksiklik olduğu gösterilmiştir; maksimum satır bazlı eksiklik
+oranı %0,90 olup, %10'dan fazla eksik değere sahip hiçbir satır bulunmamıştır. Bu
+nedenle satır silme işlemi uygulanmamıştır ve veri setinin bütünlüğü korunmuştur.
+Satır silme işlemi sadece hedef değişkeni (“label” etiketi) olmayan verilerde
+uygulanmıştır.
+​
+
+heart_axis, PTB‑XL veritabanında her kayıt için kalbin elektriksel
+
+ekseninin kaba, kategorik bir özetini (örneğin LAD, RAD, ALAD, unknown vb.)
+tutan, rapor/yorum temelli bir sütundur; yani sinyalden zaten çıkarılmış eksen
+bilgisinin doktor raporundaki özet etiketi gibidir. Bu projede ise 12SL özellik
+dosyasında QRS/P/T eksenleri ve ilgili dalga morfolojileri zaten ayrıntılı ve sayısal
+(sürekli) feature’lar olarak yer almaktadır; dolayısıyla heart_axis bu sayısal eksen
+bilgisiyle büyük ölçüde redundant, hatta daha az bilgi taşıyan, kaba bir kategorik
+özet konumundadır. Ayrıca heart_axis kısmen klinik yorum ve rapor metniyle
+ilişkili olduğundan, “tamamen sinyalden ve otomatik ölçümlerden beslenen” bir
+model kurma hedefiyle de çok iyi örtüşmez; ek olarak, bu tek kategorik sütun için
+özel bir encoding (One‑Hot vb.) ve ayrı bir pipeline kolu tanımlamak gerekecek,
+ancak beklenen ek performans katkısı sınırlı ve belirsizdir. Bu nedenlerle, bilimsel
+açıdan modelin ihtiyaç duyduğu eksen bilgisi zaten zengin sayısal feature’larla
+sağlandığı, heart_axis ise hem redundant hem de rapor-temelli gürültü
+
+içerebildiği için, bu çalışmada özellik setine dahil edilmemiş ve kullanılmaması
+tercih edilmiştir.
+​
+
+Benzer gerekçelerle, PTB‑XL metadata tablosundaki diğer rapor ve sistem
+
+kaynaklı öznitelikler (örneğin ham tanı kodlarını içeren scp_codes, serbest metin
+rapor alanları, cihaz/merkez bilgileri ve gürültü/artefakt etiketleri) de modelin giriş
+uzayına dahil edilmemiştir. Bu çalışmada giriş özellikleri, ağırlıklı olarak PTB‑XL+
+12SL dosyasından elde edilen zengin sayısal ECG ölçümleri ile sınırlandırılmıştır.
+Böylece model, tanı etiketine çok yakın veya rapor temelli özetlerden ziyade,
+doğrudan sinyalden otomatik çıkarılmış nicel bilgiyi öğrenmeye odaklanmaktadır ve
+gereksiz bilgi sunulmamaktadır.​
+Amputasyon (imputation) yapmadan önce klasik bilgi sızıntılarını önlemek
+için train set veri seti öğrenme (train), kontrol (validation) ve test kümelerine
+ayrılmıştır. Bunun olmaması durumunda, bir doldurma işlemi yapılırken alınan
+ortalama (mean) değer bütün veri setinin ortalama değeri olacaktır, bu eğitim
+verisinde klasik bir sızıntı (leak) olarak tanınmaktadır çünkü bütün veri setine ait
+ortalama bilgisi bütün kümelerde dağıtılmış olacaktır. Buna binaen, bu çalışmada
+veri sızıntısı problemine dikkat edilmiştir. Kümeleme oranları aşağıdaki gibidir:
+●​ Eğitim (Train): 17084 samples (79.9%)
+●​ Kontrol (Val): 2146 samples (10.0%)
+●​ Test: 2158 samples (10.1%)
+​
+
+Amputasyon işlemi sadece Eğitim veri setinin üzerinde uygulanmıştır, hali
+
+hazırda fit edilmiş imputer, kontrol ve test veri setleri için de uygulanmıştır. bu
+çalışmada kullanılan basit imputer median değeridir. Bu işlemden önce kayıp
+değerler eğitim seti için 41455, kontrol seti için 4974, test seti içinse 5019 dur. İşlem
+sonrası bütün kümelerde kayıp değerler sıfıra indirgenmiştir.
+Benzer şekilde sadece Eğitim kümesi üzerinde ölçekleme modeli geliştirilmiş,
+daha sonra diğer kümeler için uygulanmıştır. Ölçekleme yapılırken eğitim veri
+setinin
+
+her
+
+sayısal
+
+özelliği
+
+standardize
+
+StandardScaler()
+
+edilmiştir.
+
+fonksiyonunu kullanarak her sütün için ortalaması (µ) ve standart sapması (σ)
+hesaplanıp aşağıdaki formülle dönüşümü yapılıyor:
+
+𝑥 =
+
+(𝑥− µ)
+σ
+
+​​
+
+​
+
+​
+
+​
+
+(1)
+
+ve bu sayede ortalaması ~0.0, standart sapması ~1.0 yapılması hedeflenmiştir. daha
+sonra aynı ölçekleyeni doğrulama seti ve test seti için ayrı olarak kullanıldı. Bu işlem
+sonucunda elde edilen değerler 10⁻³ mertebesinde nümerik tolerans içindedir ve
+ölçekleme tutarlıdır.
+​
+
+Bahsi geçen işlemler neticesinde kümeler içindeki sınıf dağılımları Figür 2’de
+
+gösterilmiştir.
+
+​
+Figür 2. Splitlere Göre Sınıf Dağılımı.
+​
+
+Özet olarak bu çalışmada PTB-XL veri seti için uygulanan önişleme
+
+hattı, veri kalitesini artırmak ve veri sızıntısını önlemek amacıyla tasarlanmıştır.
+Etiketi eksik olan ve özelliklerinin büyük kısmı boş olan kayıtlar çıkarılmış, boy ve
+kilodan türetilen BMI ile P-dalgasıyla ilişkili eksiklik paternlerini yakalayan ikili
+“missing indicator” değişkenleri eklenmiştir. Ardından veri, strat_fold etiketine göre
+eğitim,
+
+doğrulama
+
+ve
+
+test kümelerine
+
+ayrılmış; medyan
+
+imputasyon ve
+
+standartlaştırma yalnızca eğitim kümesi üzerinde fit edilerek aynı dönüşümler
+doğrulama ve test kümelerine uygulanmıştır. Son olarak, dengesiz sınıf dağılımını
+dengelemek üzere sınıf ağırlıkları yalnızca eğitim verisi üzerinden hesaplanmış ve
+azınlık sınıfların modele katkısı artırılmıştır.
+
+2.3 Öznitelik Seçimi
+Çalışmada, önişlenmiş tam özellik uzayından modelleme için en bilgilendirici
+değişkenleri seçmek amacıyla sistematik bir özellik seçimi (feature selection) adımı
+uygulanmıştır. Öncelikle, X_train/X_val/X_test kümeleri ve bunlara karşılık gelen
+tüm özellik isimleri yüklendikten sonra, bilgi içeriği son derece düşük olan,
+
+neredeyse sabit özellikler VarianceThreshold yöntemi ile elenmiş; ardından, kalan
+özellikler arasındaki mutlak korelasyonu 0.95’in üzerinde olan, birbirini büyük
+ölçüde kopyalayan sütunlar çıkarılarak güçlü çoklu doğrusal bağlantı azaltılmıştır.
+Daha sonra, her bir özellik için hem sınıf etiketi ile karşılıklı bağımlılığı yakalayan
+mutual information skoru hem de Random Forest tabanlı özellik önem skorları
+hesaplanmış, bu iki sıralama birleştirilerek ortalama sıralamaya göre en önemli
+değişkenler belirlenmiştir. Bu birleşik önem sıralamasından hareketle Top-50,
+Top-100 ve Top-200 özellik listeleri oluşturulmuş ve her bir alt küme için
+X_train_top50.csv,
+validasyon/test
+
+X_train_top100.csv,
+
+kümeleri)
+
+üretilerek
+
+X_train_top200.csv
+
+(ve
+
+karşılık
+
+gelen
+
+model
+
+kullanılmak
+
+üzere
+
+eğitiminde
+
+kaydedilmiştir. Son aşamada, principal bileşen analizi (PCA) ile açıklanan toplam
+varyans incelenmiş ve elde edilen bileşen sayısı–varyans ilişkisi görselleştirilerek
+özellik uzayının etkin boyutu hakkında ek yorum imkânı sağlanmıştır. Bu adım,
+model eğitimi teorik olarak tam özellik setiyle de mümkün olmakla birlikte, yaklaşık
+800 boyutlu bir uzayın hem hesaplama maliyeti hem de aşırı uyum (overfitting) riski
+göz önüne alındığında, daha kompakt ve bilgilendirici alt kümeler üzerinden karar
+ağaçları, SVM ve benzeri yöntemlerin daha hızlı, daha kararlı ve genelleme gücü
+yüksek şekilde eğitilmesini sağlar; ayrıca çalışma kapsamında kurgulanan
+Top-50/Top-100/Top-200 karşılaştırmalarının temelini oluşturduğu için deney
+tasarımının merkezî bileşenlerinden biridir.
+Özellik
+
+seçimi
+
+çıktıları,
+
+ilk
+
+olarak
+
+VarianceThreshold
+
+filtresinin
+
+uygulanmasına rağmen çok düşük varyanslı hiçbir özelliğin elenmediğini, esas
+indirgemeyi ise yüksek korelasyon eşiği (|r|>0.95) ile 138 redundant sütunun
+çıkarılması sonucu 793 boyuttan 655’e inen bir uzayın sağladığını göstermektedir.
+PCA analizi ise toplam varyansın %90’ının 141, %95’inin 204 ve %99’unun 347
+bileşenle açıklanabildiğini göstererek etkin boyutun ham 793 özelliğin oldukça
+altında olduğunu nicel olarak desteklemiştir
+[mutual information açıklanmalı entropi bağlantılı kısmı gerekli mi şüpheli]
+
+2.4 Model Seçimi
+[kabaca yazılı düzenlenecek]
+​
+
+Aşağıdaki modeller kullanılıp aralarında karşılaştırma yapılmıştır:
+●​ Decision Tree
+
+●​ Naive Bayes
+●​ Random Forest
+●​ SVM
+
+​
+
+2.5 Kodlama ortamı
+python, kullanılan libraryler, fonksyonlar, reponun tanıtılması [github link],
+
+4.​Sonuçlar
+[sonuçlar tek tek açıklanacak]
+
+[diğerleri daha önceki run’da elde edildiği için runtime süreleri yok onu
+hallederiz]
+En iyi sonuç Random Forest modeli top 200 ile elde edilmiştir:
+
+top 200 özet:
+Model
+
+Feature
+Set
+
+Acc
+urac
+y
+
+Macro
+F1
+
+Weight
+ed F1
+
+Macro
+Precisi
+on
+
+Macro
+Recall
+
+ROC-A
+UC
+
+Trainin
+g Time
+(s)
+
+Decisio
+nTree
+
+top200
+
+0.66
+2650
+6024
+0963
+86
+
+0.58269 0.66947 0.57899 0.60860 0.46242
+121878 534208 272430 304422 412665
+47175
+54249
+73967
+6068
+9998
+
+Rando
+mFores
+t
+
+top200
+
+0.75
+8109
+3605
+1899
+9
+
+0.66635 0.74913 0.71207 0.63980 0.46331 857.174
+567317 974291 037655 841383 834817 390316
+74762
+0028
+72959
+09231
+268314 0095
+
+NaiveB
+ayes
+
+top200
+
+0.66
+3577
+3864
+6895
+27
+
+0.54904 0.64749 0.58154 0.54725 0.42134
+884390 699129 599515 503182 400193
+56435
+21286
+56086
+38212
+91996
+
+SVM
+
+top200
+
+0.71
+7330
+8619
+0917
+52
+
+0.64383 0.72387 0.63466 0.66579 0.46669
+228022 369170 515374 210674 295561
+37015
+11227
+95276
+43053
+457724
+
+5.​Tartışma
+[Bulgulardaki güçlü yönler, literetürle karşılaştırlması Neyi daha iyi
+yapabilirdik ? tartışılacak]
+
+dikkat edilmesi gereken hususlar var daha iyi sonuçlar için:
+●​ oversampelling [denenecek]
+
+6.​Referanslar
+[3] Wagner, P., Strodthoff, N., Bousseljot, R., et al. PTB-XL, a large publicly available
+electrocardiography dataset. Scientific Data, 7, 154 (2020).
+[4] PhysioNet. PTB-XL: A Large Annotated ECG Dataset.​
+Erişim: https://physionet.org/content/ptb-xl/
+[5] Bousseljot, R., Kreiseler, D., Schnabel, A. Nutzung der EKG-Signaldatenbank
+CARDIODAT der PTB über das Internet. Biomedizinische Technik, 40(S1), 317–318
+(1995).
+
+
