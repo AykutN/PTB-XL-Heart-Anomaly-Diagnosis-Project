@@ -52,3 +52,14 @@ Thumbs.db
 # Logs
 *.log
 *.zip
+
+# .tex junk files
+*.aux
+*.log
+*.toc
+*.out
+*.nav
+*.snm
+*.fls 
+*.fdb_latexmk
+*.synctex.gz
