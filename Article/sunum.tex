@@ -2,8 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[turkish]{babel}
-\shorthandoff{=}
+\usepackage[turkish,shorthands=off]{babel}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
@@ -269,9 +268,11 @@
 
 \begin{frame}{Kodlama Ortamı}
 	\begin{itemize}
-		\item Python ve \texttt{scikit-learn} başta olmak üzere standart makine öğrenmesi kütüphaneleri kullanılmıştır.
-		\item Veri işleme, ön işleme hattı ve model eğitim kodları proje deposunda versiyonlanmıştır.
-		\item \texttt{pandas}, \texttt{numpy}, \texttt{matplotlib/seaborn}, \texttt{scikit-learn} temel bileşenlerdir.
+		\item Tüm analiz ve deneyler Python 3 ortamında, açık kaynak kütüphaneler kullanılarak gerçekleştirilmiştir.
+		\item Bağımlılıklar \texttt{requirements.txt} ile yönetilmiştir: \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{matplotlib}, \texttt{seaborn}, \texttt{tqdm} (opsiyonel: \texttt{wfdb}).
+		\item Deney akışı modülerleştirilmiştir: ön işleme hattı (\texttt{preprocessing/pipeline.py}), model eğitimi ve metrik/çizimler (\texttt{training/train\_models.py}), makale figürleri (\texttt{figures/generate\_figures.py}).
+		\item Tekrarlanabilirlik için veri bölme ve modelleme adımlarında sabit tohum (\texttt{random\_state=42}) kullanılmış; dönüşümler yalnızca eğitim setinde fit edilerek veri sızıntısı engellenmiştir.
+		\item Kod ve deney çıktıları sürüm kontrolü ile yönetilmiş ve herkese açık repo olarak paylaşılmıştır: \href{https://github.com/AykutN/PTB-XL-Heart-Anomaly-Diagnosis-Project}{github.com/AykutN/PTB-XL-Heart-Anomaly-Diagnosis-Project}
 	\end{itemize}
 \end{frame}
 
