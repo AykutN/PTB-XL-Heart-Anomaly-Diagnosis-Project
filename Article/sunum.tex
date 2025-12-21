@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[turkish]{babel}
+\shorthandoff{=}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
@@ -103,6 +104,11 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Figür 1: Veri Seti Genel Görünüm}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../eda/dataset_overview.png}}
+\end{frame}
+
 \begin{frame}{Sınıf Dağılımları ve Dengesizlik}
 	\begin{itemize}
 		\item Beş üst sınıf: Normal, MI, ST/T Değişikliği (STTC), İletim Bozukluğu (CD), Hipertrofi (HYP).
@@ -145,6 +151,11 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Figür 2: Eksik Değer Analizi}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../figures/missing_values_analysis.png}}
+\end{frame}
+
 \begin{frame}{Eksik Veri Stratejisi}
 	\begin{itemize}
 		\item P dalgası ile ilişkili özniteliklerdeki eksiklik, MI ve STTC sınıflarında anlamlı biçimde daha sık görülmektedir.
@@ -179,6 +190,11 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}{Figür 3: Splitlere Göre Sınıf Dağılımı}
+	\centering
+	\resizebox{0.98\linewidth}{!}{\includegraphics{../figures/class_distribution_splits.png}}
+\end{frame}
+
 \begin{frame}{Sınıf Dengesizliği}
 	\begin{itemize}
 		\item Eğitim/val/test kümeleri oluşturulduktan sonra sınıf dağılımları incelenmiş, dengesizliğin korunduğu görülmüştür.
@@ -209,6 +225,11 @@
 		\item En yüksek skoru alan 50, 100 ve 200 öznitelik; üç ayrı alt küme (Top-50, Top-100, Top-200) olarak tanımlanmıştır.
 		\item Bu alt kümelerle ayrı RF modelleri eğitilerek özellik sayısının performansa ve overfitting'e etkisi incelenmiştir.
 	\end{itemize}
+\end{frame}
+
+\begin{frame}{Figür 4: Öznitelik Seçimi Özeti}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../preprocessing/feature_selection_analysis.png}}
 \end{frame}
 
 \subsection{Model Seçimi ve Eğitim}
@@ -296,6 +317,11 @@
 		\end{itemize}
 		\item HYP diğer sınıflara göre daha zor bir sınıftır; buna rağmen AUC'nin 0.88 üzerinde olması genel ayrıştırma kapasitesinin güçlü olduğunu göstermektedir.
 	\end{itemize}
+\end{frame}
+
+\begin{frame}{Figür 5: ROC Eğrileri (Random Forest - Top-200)}
+	\centering
+	\resizebox{0.95\linewidth}{!}{\includegraphics{../results/roc_curves_RandomForest_top200.png}}
 \end{frame}
 
 %=================================
