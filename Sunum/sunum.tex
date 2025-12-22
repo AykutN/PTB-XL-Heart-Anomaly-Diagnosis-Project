@@ -9,6 +9,12 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 
+% Hyperref PDF metadata: make line breaks/text formatting safe in PDF strings
+\pdfstringdefDisableCommands{%
+	\def\\{ }%
+	\def\textbf#1{#1}%
+}
+
 % --- Title page logos (top-left / top-right) ---
 % --- Title page logos (top-left / top-right) ---
 \usepackage{tikz}
@@ -93,7 +99,7 @@
 \section{Literatür Taraması}
 
 \begin{frame}{Literatürden Örnek Çalışma 1}
-		\textbf{[1]} PTB-XL ve Georgia ECG veri setlerinde, sol ventriküler hipertrofi (LVH) tespiti:
+		PTB-XL ve Georgia ECG veri setlerinde, sol ventriküler hipertrofi (LVH) tespiti \textbf{[1]}:
 	\begin{itemize}
 		\item Yalnızca NORMAL ve LVH etiketli kayıtlar kullanılmış, düşük kaliteli sinyaller elenmiştir.
 		\item Özellik çıkarımı araştırmacılar tarafından yapılmış; Logistic Regresyon, Rastgele Orman (RF) ve Destek Vektör Makinesi (SVM) denenmiştir.
@@ -104,7 +110,7 @@
 \end{frame}
 
 \begin{frame}{Literatürden Örnek Çalışma 2}
-		\textbf{[2]} Miyokardiyal Enfarktüs tespiti için klasik ML ve CNN karşılaştırması:
+		Miyokardiyal Enfarktüs tespiti için klasik ML ve CNN karşılaştırması \textbf{[2]}:
 	\begin{itemize}
 		\item 7 klasik model: KNN, SVM, RF, XGBoost, Decision Tree, Gaussian Naive Bayes vb.
 		\item Eksik verilerde \texttt{SimpleImputer}, ağaç dışı modellerde \texttt{StandardScaler} kullanılmıştır.
@@ -115,7 +121,7 @@
 \end{frame}
 
 \begin{frame}{Literatürden Örnek Çalışma 3}
-		\textbf{[4]} PhysioNet/CinC 2020 Challenge, 12 derivasyonlu EKG ve XGBoost:
+		PhysioNet/CinC 2020 Challenge, 12 derivasyonlu EKG ve XGBoost \textbf{[4]}:
 	\begin{itemize}
 		\item Çoklu etiket problemi için her etiket için ayrı bir ikili XGBoost modeli eğitilmiştir.
 		\item Sınıf dengesizliği: undersampling + K-fold çapraz doğrulama ile ele alınmıştır.
@@ -311,6 +317,15 @@
 	\footnotesize{Not: En yüksek skora sahip öznitelikler (Top-50, Top-100, Top-200) seçilerek model eğitiminde kullanılmıştır.}
 \end{frame}
 
+\begin{frame}{Figür 5: Korelasyon Isı Haritası (Top-100) filtreleme sonrası}
+	\centering
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.75\textheight]{../reports/feature_selection/correlation_heatmap_sample.png}
+		\caption{Top-100 Öznitelik Korelasyon Isı Haritası filtreleme sonrası}
+	\end{figure}
+\end{frame}
+
 \subsection{Model Seçimi ve Eğitim}
 
 \begin{frame}{Model Seçimi: Random Forest}
@@ -329,7 +344,33 @@
 		\end{itemize}
 	\end{itemize}
 \end{frame}
-
+\begin{frame}{Random Forest: Çalışma Prensibi ve Mantığı}
+	\begin{itemize}
+		\item \textbf{Temel fikir:} Tek bir karar ağacı yerine, \emph{çok sayıda} farklı karar ağacını bir araya getirerek (ensemble) daha kararlı ve genellenebilir bir model elde etmek.
+		
+		\item \textbf{Bagging (Bootstrap Aggregation):}
+		Her ağaç, eğitim verisinden \emph{tekrar seçmeli} (bootstrap) örnekleme ile oluşturulan farklı bir alt veri kümesiyle eğitilir.
+		\begin{itemize}
+			\item Böylece ağaçlar aynı veriyi görse bile farklı örüntüler öğrenir.
+			\item Amaç, tek ağaçların \textbf{yüksek varyansını} azaltmaktır.
+		\end{itemize}
+		
+		\item \textbf{Rastgele öznitelik altkümesi:}
+		Her düğümde bölme yapılırken tüm öznitelikler yerine rastgele seçilmiş bir alt küme değerlendirilir.
+		\begin{itemize}
+			\item Ağaçlar arası korelasyonu düşürür, çeşitliliği artırır.
+			\item Benzer güçlü özniteliklerin tüm ağaçları domine etmesini engeller.
+		\end{itemize}
+		
+		\item \textbf{Birleştirme (Aggregation):} Sınıflandırmada ağaç çıktıları çoğunluk oyu / olasılık ortalaması ile birleştirilir:
+		\[
+		\hat{p}(y=c\mid x)=\frac{1}{T}\sum_{t=1}^{T} p_t(y=c\mid x), \qquad
+		\hat{y}=\arg\max_c \hat{p}(y=c\mid x)
+		\]
+		
+		\item \textbf{Yan ürünler:} \emph{Out-of-bag} (OOB) örnekleriyle hızlı hata tahmini ve öznitelik önem skorları (feature importance) elde edilebilir.
+	\end{itemize}
+\end{frame}
 \begin{frame}{Dengesizlik Deney Tasarımı}
 	\begin{itemize}
 		\item Aynı RF modeli altında iki değişkenin etkisi incelenmiştir:
@@ -437,7 +478,65 @@
 		\item HYP performansını artırmak için alt sınıf (ör. LVH/RVH) düzeyinde daha homojen etiketleme ve ek vektörkardiyografik özniteliklerin değerlendirilmesi.
 	\end{itemize}
 \end{frame}
+\begin{frame}{Gelecek Çalışmalar (Devam)}
+		LLM modellerinden yararlanılarak bu sonuçlar bulunmuştur:
+
+	\begin{itemize}
+		\item Ham EKG dalga formu üzerinden 1D-CNN/Transformer tabanlı derin öğrenme modelleri ve klasik özniteliklerle hibrit yaklaşımların karşılaştırılması.
+		\item Özellikle azınlık sınıflar için özdenetimli (self-supervised) ön eğitim (ör. contrastive learning) ile temsil öğrenimi ve ardından ince ayar (fine-tuning).
+		\item Değerlendirmede hasta-bazlı (patient-wise) bölme, harici veri seti ile genelleme testi ve cihaz/merkez farklılıklarına karşı alan uyarlama (domain adaptation).
+		\item Gürültü/artefakt dayanıklılığı: veri artırma (noise, baseline wander), kalite kontrol (signal quality index) ve derivasyon (lead) seçiminin etkisinin analizi.
+		\item Açıklanabilirlik ve klinik doğrulama: SHAP/permütasyon önemleri ile kararların yorumlanması ve hata analiziyle (confusion + örnek inceleme) model iyileştirme döngüsü.
+	\end{itemize}
+\end{frame}
 %=================================
+
+\begin{frame}[t]{Süreç Fotoğrafları}
+	\centering
+
+	% Top row: two meeting photos (same height so they align and fit)
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.49\textwidth}
+			\centering
+			\includegraphics[
+				width=\linewidth,
+				height=0.7\textheight,
+				keepaspectratio
+			]{meeting_photo_1.png}\\[-2pt]
+			\scriptsize Toplantı 1
+		\end{column}
+
+		\begin{column}{0.49\textwidth}
+			\centering
+			\includegraphics[
+				width=\linewidth,
+				height=0.7\textheight,
+				keepaspectratio
+			]{meeting_photo_2.png}\\[-2pt]
+			\scriptsize Toplantı 2
+		\end{column}
+	\end{columns}
+
+	\vspace{0.15cm}
+
+\end{frame}
+
+\begin{frame}{Gantt Şeması}
+	% Bottom: Gantt (bounded by height to prevent overflow)
+	\centering
+	\includegraphics[
+		width=\linewidth,
+		height=0.8\textheight,
+		keepaspectratio
+	]{gantt.jpeg}\\[-2pt]
+	\scriptsize Proje Gantt Şeması
+\end{frame}
+
+\begin{frame}{Beyan}
+	\centering
+	Bu sunumda yer alan tüm analizler, yorumlar ve sonuçlar \textbf{yazarlar tarafından} gerçekleştirilmiş olup, herhangi bir dış kaynaktan izinsiz alıntı veya intihal içermemektedir.\par\medskip
+	Ayrıca, çalışma kapsamında \textbf{kod geliştirme süreçlerinde} ve \textbf{bazı metin bölümlerinin taslaklandırılması/düzenlenmesinde} Büyük Dil Modellerinden (LLM) destek alınmıştır.
+	\end{frame}
 \section{Referanslar}
 
 \begin{frame}[allowframebreaks]{Referanslar}
@@ -504,7 +603,11 @@
 
 \begin{frame}{Teşekkürler}
 	\centering
-	Sorularınız için teşekkür ederiz.
+	\Huge{Sorularınız için teşekkür ederiz.}
+
+	\vfill
+	\footnotesize
+	\textbf{M. Yusuf Aykut \quad İbrahim Abushawish \quad Samet Ertuğrul Kurum \quad Samet Baturay}
 \end{frame}
 
 \end{document}
