@@ -97,7 +97,7 @@
 	\begin{itemize}
 		\item Yalnızca NORMAL ve LVH etiketli kayıtlar kullanılmış, düşük kaliteli sinyaller elenmiştir.
 		\item Özellik çıkarımı araştırmacılar tarafından yapılmış; Logistic Regresyon, Rastgele Orman (RF) ve Destek Vektör Makinesi (SVM) denenmiştir.
-		\item RF ve SVM ile %87 üzerinde duyarlılık ve özgüllük elde edilmiştir.
+		\item RF ve SVM ile \%87 üzerinde duyarlılık ve özgüllük elde edilmiştir.
 		\item Veri dengesizliği: normal sınıfta downsampling, 100 kez tekrarlı eğitim ve ensemble ile telafi edilmiştir.
 		\item SFFS ile en önemli 5 özellik seçilmiş, basitleştirilmiş modeller kurulmuştur.
 	\end{itemize}
@@ -110,7 +110,7 @@
 		\item Eksik verilerde \texttt{SimpleImputer}, ağaç dışı modellerde \texttt{StandardScaler} kullanılmıştır.
 		\item PTB-XL'den yalnızca NORM ve MI etiketli, 100 Hz, 12 derivasyonlu EKG'ler alınmıştır.
 		\item Veri MI referanslı 70/15/15 (train/val/test) bölünmüş, yalnızca eğitim seti dengelenmiştir.
-		\item En yüksek doğruluk: XGBoost ile %89; ardından SVM ve RF %88 düzeyinde.
+		\item En yüksek doğruluk: XGBoost ile \%89; ardından SVM ve RF \%88 düzeyinde.
 	\end{itemize}
 \end{frame}
 
@@ -142,7 +142,7 @@
 	\begin{itemize}
 		\item 18.869 hastadan, 10 saniyelik 21.799 klinik 12 derivasyonlu EKG kaydı (500 ve 100 Hz sürümleri mevcut).
 		\item Yaş dağılımı 40--80 yaşta yoğun, ortalama 62.8 yıl; ortalama boy 166.7 cm, kilo 71.0 kg.
-		\item Cinsiyet: %52.1 erkek, %47.9 kadın.
+		\item Cinsiyet: \%52.1 erkek, \%47.9 kadın.
 		\item Veri çerçevesi: 21.388 kayıt, 793 sütun (750 sayısal, 42 tamsayı, 1 kategorik).
 	\end{itemize}
 \end{frame}
@@ -152,11 +152,11 @@
 		\item Beş üst sınıf: Normal, MI, ST/T Değişikliği (STTC), İletim Bozukluğu (CD), Hipertrofi (HYP).
 		\item Örnek dağılımı yaklaşık olarak:
 		\begin{itemize}
-			\item NORM: %44.5
-			\item MI: %25.4
-			\item STTC: %13.2
-			\item CD: %10.9
-			\item HYP: %6.1
+			\item NORM: \%44.5
+			\item MI: \%25.4
+			\item STTC: \%13.2
+			\item CD: \%10.9
+			\item HYP: \%6.1
 		\end{itemize}
 		\item Belirgin sınıf dengesizliği mevcuttur: normal kayıtlar veri setinin neredeyse yarısını oluştururken, HYP oldukça azdır.
 		\item Bu durum, modellerin azınlık sınıfları öğrenmesini zorlaştırabilir ve metriklerin yanıltıcı şişmesine yol açabilir.
@@ -178,14 +178,14 @@
 	\begin{itemize}
 		\item Demografik değişkenler:
 			\begin{itemize}
-				\item Boy: %67.65 eksik, kilo: %56.21 eksik; bu nedenle modelden tamamen çıkarılmıştır.
+				\item Boy: \%67.65 eksik, kilo: \%56.21 eksik; bu nedenle modelden tamamen çıkarılmıştır.
 			\end{itemize}
 		\item EKG öznitelikleri:
 			\begin{itemize}
 				\item \texttt{T\_AxisFront\_Global} ve \texttt{R\_AxisFrontal\_Global}: çok az sayıda eksik; ilgili kayıtlar silinmiştir.
-				\item P dalgası ile ilişkili \texttt{P\_On\_Global}, \texttt{P\_Off\_Global}, \texttt{P\_Dur\_Global}, \texttt{P\_AxisFront\_Global}, \texttt{PR\_Int\_Global}, \texttt{HR\_Atrial\_Global}: yaklaşık %8 eksik.
+				\item P dalgası ile ilişkili \texttt{P\_On\_Global}, \texttt{P\_Off\_Global}, \texttt{P\_Dur\_Global}, \texttt{P\_AxisFront\_Global}, \texttt{PR\_Int\_Global}, \texttt{HR\_Atrial\_Global}: yaklaşık \%8 eksik.
 			\end{itemize}
-		\item Satır bazlı eksiklik oranı %1'in altında olduğundan, satır silme yalnızca etiketi eksik örneklerle sınırlı tutulmuştur.
+		\item Satır bazlı eksiklik oranı \%1'in altında olduğundan, satır silme yalnızca etiketi eksik örneklerle sınırlı tutulmuştur.
 	\end{itemize}
 \end{frame}
 
@@ -207,7 +207,7 @@
 		\begin{itemize}
 			\item P dalgası öznitelikleri için: sabit değer (0.0) + \texttt{is\_missing} bayrağı ile kodlama.
 			\item Diğer sayısal öznitelikler için: eğitim seti medyanı + \texttt{is\_missing} bayrağı.
-			\item \texttt{heart\_axis}: %38 eksiklik ve düşük ek bilgi nedeniyle tamamen çıkarılmıştır.
+			\item \texttt{heart\_axis}: \%38 eksiklik ve düşük ek bilgi nedeniyle tamamen çıkarılmıştır.
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -216,9 +216,9 @@
 	\begin{itemize}
 		\item Veri, \texttt{strat\_fold} etiketine göre üç kümeye ayrılmıştır:
 		\begin{itemize}
-			\item Eğitim: 17.084 örnek (%79.9)
-			\item Doğrulama: 2.146 örnek (%10.0)
-			\item Test: 2.158 örnek (%10.1)
+			\item Eğitim: 17.084 örnek (\%79.9)
+			\item Doğrulama: 2.146 örnek (\%10.0)
+			\item Test: 2.158 örnek (\%10.1)
 		\end{itemize}
 		\item Eksik değer doldurma (imputasyon):
 		\begin{itemize}
