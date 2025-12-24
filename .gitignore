@@ -1,12 +1,6 @@
-# Dataset files - too large for git
+# Datasets (excluded from submission)
 ptb-xl/
 ptb-xl+/
-
-# Processed data files
-data/processed/
-
-# Trained models
-models/
 
 # Python
 __pycache__/
@@ -14,52 +8,41 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
+dist/
+build/
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Virtual Environment
-venv/
-ENV/
-env/
-.venv/
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-*.zip
+# Results archive (old results)
+results_from_previous_model_archive/
 
-# .tex junk files
-*.aux
+# Temporary files
+*.tmp
 *.log
-*.toc
-*.out
-*.nav
-*.snm
-*.fls 
-*.fdb_latexmk
-*.synctex.gz
+*.bak
+
+# Large processed data files (keep structure, exclude large CSVs)
+data/processed/*.csv
+!data/processed/selected/
+
+# Sunum files (not needed for reproduction)
+Sunum/
+
+# Word/PDF documents (keep only final PDF)
+*.docx
+PTB-XL+ ECG Diagnosis Recognition*.pdf
+!PTB-XL+ ECG Diagnosis Recognition  (3).pdf
