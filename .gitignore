@@ -35,10 +35,9 @@ results_from_previous_model_archive/
 *.log
 *.bak
 
-# Large processed data files (keep structure, exclude all CSVs)
-# User must run preprocessing pipeline to generate these
+# Large processed data files (keep structure, exclude large CSVs)
 data/processed/*.csv
-data/processed/selected/*.csv
+!data/processed/selected/
 
 # Sunum files (not needed for reproduction)
 Sunum/
