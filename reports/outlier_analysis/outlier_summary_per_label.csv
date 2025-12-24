@@ -1,6 +1,6 @@
-Label,Total Samples,Isolation Forest (%),Mahalanobis Distance (%),Local Outlier Factor (%),Consensus (%)
-NORM,7596,3.30,5.00,1.58,1.53
-MI,4379,6.07,5.00,3.52,2.63
-STTC,4186,6.40,5.02,3.39,2.63
-CD,3907,7.17,5.02,4.56,3.46
-HYP,2119,5.57,5.00,3.07,2.36
+Label,Total Samples,Outliers,Outlier Percentage (%)
+NORM,7596,251,3.30
+MI,4379,266,6.07
+STTC,4186,268,6.40
+CD,3907,280,7.17
+HYP,2119,118,5.57

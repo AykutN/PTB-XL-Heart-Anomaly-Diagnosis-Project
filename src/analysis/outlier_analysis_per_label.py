@@ -9,11 +9,8 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import IsolationForest
-from sklearn.neighbors import LocalOutlierFactor
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.covariance import MinCovDet
-from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -54,47 +51,6 @@ def detect_outliers_isolation_forest(X_scaled):
     
     return outlier_preds == -1, scores  # True for outliers, scores
 
-def detect_outliers_mahalanobis(X_scaled):
-    """Detect outliers using Mahalanobis distance with percentile-based threshold.
-    
-    Uses top 5% of Mahalanobis distances as outliers.
-    Chi-square distribution assumption may not hold for high-dimensional data,
-    so we use percentile-based approach instead.
-    """
-    try:
-        # Use robust covariance estimator (MinCovDet) to handle outliers in covariance estimation
-        robust_cov = MinCovDet(random_state=42).fit(X_scaled)
-        mahal_dist = robust_cov.mahalanobis(X_scaled)
-    except:
-        # Fallback to standard covariance if robust fails
-        try:
-            cov = np.cov(X_scaled.T)
-            inv_cov = np.linalg.inv(cov)
-            mean = np.mean(X_scaled, axis=0)
-            diff = X_scaled - mean
-            mahal_dist = np.sqrt(np.sum(diff @ inv_cov * diff, axis=1))
-        except:
-            # If still fails, return no outliers
-            return np.zeros(X_scaled.shape[0], dtype=bool), np.zeros(X_scaled.shape[0])
-    
-    # Use top 5% percentile as threshold (more conservative than chi-square for high-dim data)
-    threshold = np.percentile(mahal_dist, 95)
-    outlier_mask = mahal_dist >= threshold
-    
-    return outlier_mask, mahal_dist
-
-def detect_outliers_lof(X_scaled):
-    """Detect outliers using Local Outlier Factor with automatic contamination.
-    
-    Higher LOF scores indicate more anomalous samples.
-    Uses 'auto' contamination which adapts to the data distribution.
-    """
-    n_neighbors = min(20, max(10, X_scaled.shape[0] // 10))  # Adaptive neighbors
-    lof = LocalOutlierFactor(n_neighbors=n_neighbors, contamination='auto', n_jobs=-1)
-    outlier_preds = lof.fit_predict(X_scaled)
-    scores = -lof.negative_outlier_factor_  # Higher = more anomalous
-    
-    return outlier_preds == -1, scores  # True for outliers, scores
 
 def analyze_outliers_per_label(train_df, features, target_cols):
     """Analyze outliers for each target label separately."""
@@ -124,47 +80,21 @@ def analyze_outliers_per_label(train_df, features, target_cols):
             print(f"  Skipping {label}: insufficient samples")
             continue
         
-        # Detect outliers using multiple robust methods
-        # Each method uses its own adaptive threshold strategy
-        iso_outliers, iso_scores = detect_outliers_isolation_forest(X_label_scaled)
-        n_iso = iso_outliers.sum()
+        # Detect outliers using Isolation Forest
+        outliers, scores = detect_outliers_isolation_forest(X_label_scaled)
+        n_outliers = outliers.sum()
         
-        # Mahalanobis Distance (chi-square distribution, p < 0.05)
-        mahal_outliers, mahal_dist = detect_outliers_mahalanobis(X_label_scaled)
-        n_mahal = mahal_outliers.sum()
-        
-        # Local Outlier Factor (automatic contamination)
-        lof_outliers, lof_scores = detect_outliers_lof(X_label_scaled)
-        n_lof = lof_outliers.sum()
-        
-        # Consensus: outlier if detected by at least 2 methods (more reliable)
-        consensus_outliers = (iso_outliers.astype(int) + 
-                             mahal_outliers.astype(int) + 
-                             lof_outliers.astype(int)) >= 2
-        n_consensus = consensus_outliers.sum()
-        
-        print(f"  Isolation Forest outliers: {n_iso} ({n_iso/n_samples*100:.2f}%)")
-        print(f"  Mahalanobis Distance outliers: {n_mahal} ({n_mahal/n_samples*100:.2f}%)")
-        print(f"  Local Outlier Factor (LOF) outliers: {n_lof} ({n_lof/n_samples*100:.2f}%)")
-        print(f"  Consensus outliers (≥2 methods): {n_consensus} ({n_consensus/n_samples*100:.2f}%)")
+        print(f"  Isolation Forest outliers: {n_outliers} ({n_outliers/n_samples*100:.2f}%)")
         
         # Store results
         all_results[label] = {
             'indices': label_indices,
             'X': X_label,
             'X_scaled': X_label_scaled,
-            'iso_outliers': iso_outliers,
-            'iso_scores': iso_scores,
-            'mahal_outliers': mahal_outliers,
-            'mahal_dist': mahal_dist,
-            'lof_outliers': lof_outliers,
-            'lof_scores': lof_scores,
-            'consensus_outliers': consensus_outliers,
+            'outliers': outliers,
+            'scores': scores,
             'n_samples': n_samples,
-            'n_iso': n_iso,
-            'n_mahal': n_mahal,
-            'n_lof': n_lof,
-            'n_consensus': n_consensus
+            'n_outliers': n_outliers
         }
     
     return all_results, scaler
@@ -193,10 +123,8 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
         summary_data.append({
             'Label': label,
             'Total Samples': res['n_samples'],
-            'Isolation Forest (%)': f"{res['n_iso']/res['n_samples']*100:.2f}",
-            'Mahalanobis Distance (%)': f"{res['n_mahal']/res['n_samples']*100:.2f}",
-            'Local Outlier Factor (%)': f"{res['n_lof']/res['n_samples']*100:.2f}",
-            'Consensus (%)': f"{res['n_consensus']/res['n_samples']*100:.2f}"
+            'Outliers': res['n_outliers'],
+            'Outlier Percentage (%)': f"{res['n_outliers']/res['n_samples']*100:.2f}"
         })
     
     summary_df = pd.DataFrame(summary_data)
@@ -204,39 +132,38 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
     print(f"\nSaved summary statistics to {os.path.join(OUTPUT_DIR, 'outlier_summary_per_label.csv')}")
     
     # 2. Bar plot: Outlier percentages per label
-    fig, ax = plt.subplots(figsize=(14, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     x = np.arange(len(target_cols))
-    width = 0.2
     
-    methods = ['Isolation Forest', 'Mahalanobis Distance', 'Local Outlier Factor', 'Consensus']
-    colors_methods = ['#3498db', '#e67e22', '#1abc9c', '#c0392b']
+    values = []
+    labels_list = []
+    for label in target_cols:
+        if label in all_results:
+            res = all_results[label]
+            val = res['n_outliers'] / res['n_samples'] * 100
+            values.append(val)
+            labels_list.append(label)
+        else:
+            values.append(0)
+            labels_list.append(label)
     
-    for i, method in enumerate(methods):
-        values = []
-        for label in target_cols:
-            if label in all_results:
-                res = all_results[label]
-                if method == 'Isolation Forest':
-                    val = res['n_iso'] / res['n_samples'] * 100
-                elif method == 'Mahalanobis Distance':
-                    val = res['n_mahal'] / res['n_samples'] * 100
-                elif method == 'Local Outlier Factor':
-                    val = res['n_lof'] / res['n_samples'] * 100
-                else:  # Consensus
-                    val = res['n_consensus'] / res['n_samples'] * 100
-                values.append(val)
-            else:
-                values.append(0)
-        
-        ax.bar(x + i*width, values, width, label=method, color=colors_methods[i], alpha=0.8)
-    
+    bars = ax.bar(x, values, color=[label_colors.get(l, '#95a5a6') for l in labels_list], alpha=0.8)
     ax.set_xlabel('Diagnostic Class', fontsize=12, fontweight='bold')
     ax.set_ylabel('Outlier Percentage (%)', fontsize=12, fontweight='bold')
-    ax.set_title('Outlier Detection by Method Across Diagnostic Classes', fontsize=14, fontweight='bold')
-    ax.set_xticks(x + width * 1.5)
-    ax.set_xticklabels(target_cols)
-    ax.legend(fontsize=10)
+    ax.set_title('Outlier Detection Across Diagnostic Classes (Isolation Forest)', fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels_list)
     ax.grid(axis='y', alpha=0.3)
+    
+    # Add value labels on bars
+    for bar, val, label in zip(bars, values, labels_list):
+        if label in all_results:
+            height = bar.get_height()
+            res = all_results[label]
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.2f}%\n(n={res["n_outliers"]})',
+                    ha='center', va='bottom', fontsize=10, fontweight='bold')
+    
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'outlier_comparison_all_labels.png'), dpi=300, bbox_inches='tight')
     print(f"Saved comparison plot to {os.path.join(OUTPUT_DIR, 'outlier_comparison_all_labels.png')}")
@@ -260,8 +187,8 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
         X_pca = pca.fit_transform(res['X_scaled'])
         
         # Plot inliers and outliers separately
-        inlier_mask = ~res['consensus_outliers']
-        outlier_mask = res['consensus_outliers']
+        inlier_mask = ~res['outliers']
+        outlier_mask = res['outliers']
         
         ax1.scatter(X_pca[inlier_mask, 0], X_pca[inlier_mask, 1], 
                    c=label_colors[label], alpha=0.5, s=30, label='Inliers', edgecolors='none')
@@ -314,27 +241,33 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
         ax2.tick_params(axis='x', rotation=45, labelsize=8)
         ax2.grid(axis='y', alpha=0.3)
         
-        # 3c. Outlier detection method comparison
+        # 3c. Outlier statistics summary
         ax3 = fig.add_subplot(gs[1, 1])
-        methods = ['Isolation\nForest', 'Mahalanobis\nDistance', 'LOF', 'Consensus\n(≥2)']
-        counts = [res['n_iso'], res['n_mahal'], res['n_lof'], res['n_consensus']]
-        percentages = [c/res['n_samples']*100 for c in counts]
+        ax3.axis('off')
         
-        bars = ax3.bar(methods, percentages, color=['#3498db', '#e67e22', '#1abc9c', '#c0392b'], alpha=0.8)
-        ax3.set_ylabel('Outlier Percentage (%)', fontsize=10, fontweight='bold')
-        ax3.set_title(f'{label}: Outlier Detection Methods Comparison', fontsize=11, fontweight='bold')
-        ax3.grid(axis='y', alpha=0.3)
+        stats_text = f"""
+        OUTLIER STATISTICS
         
-        # Add value labels on bars
-        for bar, pct in zip(bars, percentages):
-            height = bar.get_height()
-            ax3.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{pct:.1f}%\n(n={int(height*res["n_samples"]/100)})',
-                    ha='center', va='bottom', fontsize=9)
+        Total Samples: {res['n_samples']:,}
+        Detected Outliers: {res['n_outliers']:,}
+        Outlier Percentage: {res['n_outliers']/res['n_samples']*100:.2f}%
         
-        # 3d. Distribution of outlier scores (using Isolation Forest scores)
+        Score Statistics:
+        • Mean Score: {res['scores'].mean():.3f}
+        • Median Score: {np.median(res['scores']):.3f}
+        • Min Score: {res['scores'].min():.3f}
+        • Max Score: {res['scores'].max():.3f}
+        
+        Note: Lower scores indicate
+        more anomalous samples
+        """
+        
+        ax3.text(0.1, 0.5, stats_text, fontsize=11, family='monospace',
+                verticalalignment='center', bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.5))
+        
+        # 3d. Distribution of outlier scores
         ax4 = fig.add_subplot(gs[2, 0])
-        scores = res['iso_scores']
+        scores = res['scores']
         
         ax4.hist(scores[inlier_mask], bins=30, alpha=0.6, color=label_colors[label], 
                 label='Inliers', edgecolor='black', linewidth=0.5)
@@ -355,12 +288,11 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
         OUTLIER ANALYSIS SUMMARY: {label}
         
         Total Samples: {res['n_samples']:,}
+        Detected Outliers: {res['n_outliers']:,} ({res['n_outliers']/res['n_samples']*100:.2f}%)
         
-        Detection Methods (score-based, ~5% threshold):
-        • Isolation Forest: {res['n_iso']} ({res['n_iso']/res['n_samples']*100:.2f}%)
-        • Mahalanobis Distance: {res['n_mahal']} ({res['n_mahal']/res['n_samples']*100:.2f}%)
-        • Local Outlier Factor: {res['n_lof']} ({res['n_lof']/res['n_samples']*100:.2f}%)
-        • Consensus (≥2 methods): {res['n_consensus']} ({res['n_consensus']/res['n_samples']*100:.2f}%)
+        Detection Method:
+        • Isolation Forest (contamination='auto')
+        • Automatically adapts threshold to data distribution
         
         Feature Space:
         • Dimensions: {res['X'].shape[1]}
