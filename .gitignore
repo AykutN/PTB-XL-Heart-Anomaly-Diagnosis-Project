@@ -37,8 +37,32 @@ results_from_previous_model_archive/
 
 # Local/generated data (do not commit)
 data/
-# Sunum files (not needed for reproduction)
-Sunum/
+
+# LaTeX junk
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.pdfsync
+*_minted*/
+.minted*/
+latexmkrc
+
+sunum/*.png
+sunum/*.jpeg
 
 # Word/PDF documents (keep only final PDF)
 *.docx
