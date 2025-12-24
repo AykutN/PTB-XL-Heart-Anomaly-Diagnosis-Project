@@ -61,8 +61,8 @@ data/
 .minted*/
 latexmkrc
 
-sunum/*.png
-sunum/*.jpeg
+Sunum/*.png
+Sunum/*.jpeg
 
 # Word/PDF documents (keep only final PDF)
 *.docx
