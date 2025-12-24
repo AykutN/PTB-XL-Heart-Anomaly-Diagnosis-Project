@@ -64,6 +64,7 @@ latexmkrc
 Sunum/*.png
 Sunum/*.jpeg
 
+models/
 # Word/PDF documents (keep only final PDF)
 *.docx
 PTB-XL+ ECG Diagnosis Recognition*.pdf
