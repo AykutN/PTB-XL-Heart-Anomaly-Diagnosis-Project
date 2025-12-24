@@ -37,7 +37,7 @@ results_from_previous_model_archive/
 
 # Large processed data files (keep structure, exclude large CSVs)
 data/processed/*.csv
-!data/processed/selected/
+data/processed/selected/
 
 # Sunum files (not needed for reproduction)
 Sunum/
