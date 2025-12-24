@@ -42,45 +42,59 @@ def load_features(n):
     df = pd.read_csv(path)
     return df['Feature'].tolist()
 
-def detect_outliers_isolation_forest(X_scaled, contamination=0.05):
-    """Detect outliers using Isolation Forest with conservative contamination."""
-    iso = IsolationForest(contamination=contamination, random_state=42, n_jobs=-1)
+def detect_outliers_isolation_forest(X_scaled):
+    """Detect outliers using Isolation Forest with automatic contamination.
+    
+    Lower scores indicate more anomalous samples.
+    Uses 'auto' contamination which adapts to the data distribution.
+    """
+    iso = IsolationForest(contamination='auto', random_state=42, n_jobs=-1)
     outlier_preds = iso.fit_predict(X_scaled)
-    return outlier_preds == -1, iso.score_samples(X_scaled)  # True for outliers, scores
+    scores = iso.score_samples(X_scaled)
+    
+    return outlier_preds == -1, scores  # True for outliers, scores
 
-def detect_outliers_mahalanobis(X_scaled, contamination=0.05):
-    """Detect outliers using Mahalanobis distance (robust to multivariate data)."""
+def detect_outliers_mahalanobis(X_scaled):
+    """Detect outliers using Mahalanobis distance with percentile-based threshold.
+    
+    Uses top 5% of Mahalanobis distances as outliers.
+    Chi-square distribution assumption may not hold for high-dimensional data,
+    so we use percentile-based approach instead.
+    """
     try:
         # Use robust covariance estimator (MinCovDet) to handle outliers in covariance estimation
         robust_cov = MinCovDet(random_state=42).fit(X_scaled)
         mahal_dist = robust_cov.mahalanobis(X_scaled)
-        
-        # Use percentile-based threshold instead of fixed threshold
-        threshold = np.percentile(mahal_dist, (1 - contamination) * 100)
-        outlier_mask = mahal_dist > threshold
-        
-        return outlier_mask, mahal_dist
     except:
         # Fallback to standard covariance if robust fails
-        cov = np.cov(X_scaled.T)
         try:
+            cov = np.cov(X_scaled.T)
             inv_cov = np.linalg.inv(cov)
             mean = np.mean(X_scaled, axis=0)
             diff = X_scaled - mean
             mahal_dist = np.sqrt(np.sum(diff @ inv_cov * diff, axis=1))
-            threshold = np.percentile(mahal_dist, (1 - contamination) * 100)
-            outlier_mask = mahal_dist > threshold
-            return outlier_mask, mahal_dist
         except:
             # If still fails, return no outliers
             return np.zeros(X_scaled.shape[0], dtype=bool), np.zeros(X_scaled.shape[0])
+    
+    # Use top 5% percentile as threshold (more conservative than chi-square for high-dim data)
+    threshold = np.percentile(mahal_dist, 95)
+    outlier_mask = mahal_dist >= threshold
+    
+    return outlier_mask, mahal_dist
 
-def detect_outliers_lof(X_scaled, contamination=0.05):
-    """Detect outliers using Local Outlier Factor."""
+def detect_outliers_lof(X_scaled):
+    """Detect outliers using Local Outlier Factor with automatic contamination.
+    
+    Higher LOF scores indicate more anomalous samples.
+    Uses 'auto' contamination which adapts to the data distribution.
+    """
     n_neighbors = min(20, max(10, X_scaled.shape[0] // 10))  # Adaptive neighbors
-    lof = LocalOutlierFactor(n_neighbors=n_neighbors, contamination=contamination, n_jobs=-1)
+    lof = LocalOutlierFactor(n_neighbors=n_neighbors, contamination='auto', n_jobs=-1)
     outlier_preds = lof.fit_predict(X_scaled)
-    return outlier_preds == -1, -lof.negative_outlier_factor_  # True for outliers, scores
+    scores = -lof.negative_outlier_factor_  # Higher = more anomalous
+    
+    return outlier_preds == -1, scores  # True for outliers, scores
 
 def analyze_outliers_per_label(train_df, features, target_cols):
     """Analyze outliers for each target label separately."""
@@ -111,16 +125,16 @@ def analyze_outliers_per_label(train_df, features, target_cols):
             continue
         
         # Detect outliers using multiple robust methods
-        # Isolation Forest (5% contamination - more conservative)
-        iso_outliers, iso_scores = detect_outliers_isolation_forest(X_label_scaled, contamination=0.05)
+        # Each method uses its own adaptive threshold strategy
+        iso_outliers, iso_scores = detect_outliers_isolation_forest(X_label_scaled)
         n_iso = iso_outliers.sum()
         
-        # Mahalanobis Distance (5% contamination)
-        mahal_outliers, mahal_dist = detect_outliers_mahalanobis(X_label_scaled, contamination=0.05)
+        # Mahalanobis Distance (chi-square distribution, p < 0.05)
+        mahal_outliers, mahal_dist = detect_outliers_mahalanobis(X_label_scaled)
         n_mahal = mahal_outliers.sum()
         
-        # Local Outlier Factor (5% contamination)
-        lof_outliers, lof_scores = detect_outliers_lof(X_label_scaled, contamination=0.05)
+        # Local Outlier Factor (automatic contamination)
+        lof_outliers, lof_scores = detect_outliers_lof(X_label_scaled)
         n_lof = lof_outliers.sum()
         
         # Consensus: outlier if detected by at least 2 methods (more reliable)
@@ -342,7 +356,7 @@ def create_visualizations_per_label(all_results, features, target_cols, scaler):
         
         Total Samples: {res['n_samples']:,}
         
-        Detection Methods (5% contamination):
+        Detection Methods (score-based, ~5% threshold):
         • Isolation Forest: {res['n_iso']} ({res['n_iso']/res['n_samples']*100:.2f}%)
         • Mahalanobis Distance: {res['n_mahal']} ({res['n_mahal']/res['n_samples']*100:.2f}%)
         • Local Outlier Factor: {res['n_lof']} ({res['n_lof']/res['n_samples']*100:.2f}%)
