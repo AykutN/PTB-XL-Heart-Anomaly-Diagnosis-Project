@@ -103,13 +103,12 @@ This generates:
 Train and evaluate models:
 
 ```bash
-python src/modeling/17_class_weight_comparison.py
+python src/modeling/06_train_models.py
 ```
 
 This script:
-- Trains Random Forest and SVM models with class-weight approach
-- Uses Top-200 features
-- Performs threshold optimization
+- Trains Random Forest models with Class Weighting (Top-50, 100, 200)
+- Trains Random Forest with Ensemble Undersampling (Top-200)
 - Generates performance metrics and visualizations
 
 ### 4. Additional Analysis (Optional)
@@ -140,26 +139,28 @@ python src/analysis/create_class_weight_visualization.py
 - **Threshold Optimization:** Optimizing classification thresholds per class to maximize F1 score.
 
 ### Models Evaluated
-1. **Random Forest** with class weights
-2. **SVM** with class weights
+1. **Random Forest** with Class Weighting (Top-50, Top-100, Top-200 features)
+2. **Random Forest** with Ensemble Undersampling (Top-200 features)
 
 ## Results
 
-The best performance was achieved using **SVM** with **Top-200 features** and **Threshold Optimization**.
+The experiments showed that handling class imbalance is crucial. The **Random Forest with Top-200 features and Class Weighting** provided the best balance between Precision and Recall.
 
 | Model | Accuracy | Precision | Recall | F1 Score | ROC-AUC |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Random Forest | 58.85% | 71.30% | 75.60% | 73.21% | 0.915 |
-| **SVM** | **59.08%** | **71.06%** | **78.99%** | **74.61%** | **0.922** |
+| RF (Top-50, CW) | 53.20% | 73.58% | 66.13% | 69.53% | 0.904 |
+| RF (Top-100, CW) | 54.82% | 75.40% | 67.64% | 71.17% | 0.909 |
+| **RF (Top-200, CW)** | **55.24%** | **75.91%** | **67.87%** | **71.50%** | **0.915** |
+| RF (Top-200, Undersampling) | 57.09% | 69.23% | 68.12% | 69.23% | 0.915 |
 
-*Note: Metrics are macro-averaged.*
+*Note: Metrics are macro-averaged. Detailed per-class metrics are available in the report.*
 
 ## Reproducibility
 
 All experiments can be reproduced by running the scripts in order:
 1. `src/preprocessing/01_merge_and_label.py` → `04_impute_and_flag.py`
 2. `src/analysis/05_feature_selection_rf.py`
-3. `src/modeling/17_class_weight_comparison.py`
+3. `src/modeling/06_train_models.py`
 
 Results are saved in:
 - `results/` - CSV files with performance metrics
