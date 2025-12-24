@@ -181,6 +181,18 @@
 	}
 \end{frame}
 
+\begin{frame}{Aykırı Değer Tespiti: Isolation Forest}
+	Çalışmada kullanılan aykırı değer tespit yöntemi: \textbf{Isolation Forest (iForest)}:
+	\begin{itemize}
+		\item \textbf{Tablo 3}’te her tanı sınıfı için iForest ile aykırı değer analizi yapılmıştır.
+		\item Her sınıf için yaklaşık \textbf{\%3.3--\%7.2} oranında aykırı değer tespit edilmiştir.
+		\item \textbf{Temel fikir:} iForest, rastgele ağaçlar ile örneklerin \emph{izolasyon zorluğunu} ölçer ve her örnek için bir \textbf{anomali skoru} üretir.
+		\item \textbf{Yorum:} Normal noktalar genellikle daha fazla bölünme ile izole edilirken, \textbf{daha kolay izole edilen} (daha kısa yol uzunluğuna sahip) örnekler aykırı değer olarak işaretlenir.
+		\item \textbf{Eşikleme:} \texttt{contamination="auto"} ile yöntem, veri dağılımına göre \textbf{otomatik} bir eşik (threshold) belirler.
+		\item iForest, \textbf{yüksek boyutlu} veri setlerinde etkinliği gösterilmiş, ölçeklenebilir bir aykırı değer tespit yaklaşımıdır.
+	\end{itemize}
+	\end{frame}
+
 \begin{frame}{PCA Grafiğinin Yorumu (2B Özet)}
 	\small
 	\begin{itemize}
