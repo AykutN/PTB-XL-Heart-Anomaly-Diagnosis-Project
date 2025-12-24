@@ -169,6 +169,34 @@
 	\end{itemize}
 \end{frame}
 
+\subsection{Keşifsel Analiz: PCA ve Aykırı Değerler}
+
+\begin{frame}{Figür: PCA Düzleminde Veri Dağılımı ve Aykırı Değerler}
+	\centering
+	\resizebox{0.8\linewidth}{!}{\includegraphics{../reports/outlier_analysis/pca_outliers_by_class.png}} %..\reports\outlier_analysis\pca_outliers_by_class.png
+	\vspace{0.15cm}
+
+	{\scriptsize
+	\textit{Not: Renkler tanı üst sınıflarını, işaret tipi ise aykırı (x) / normal (o) örnekleri göstermektedir.}
+	}
+\end{frame}
+
+\begin{frame}{PCA Grafiğinin Yorumu (2B Özet)}
+	\small
+	\begin{itemize}
+		\item PCA, yüksek boyutlu EKG özniteliklerini iki ana bileşen üzerinde özetleyerek dağılımı görselleştirir \cite{jolliffe2016-pca-review}.
+		\item Grafikte \textbf{PC1} yaklaşık \(\sim 0.21\), \textbf{PC2} yaklaşık \(\sim 0.13\) varyansı açıklamaktadır; ilk iki bileşen toplamda \(\sim 0.34\) varyansı yakalar.
+		\item Sınıflar (NORM, MI, STTC, CD, HYP) 2B projeksiyonda belirgin biçimde \textbf{üst üste biner}:
+		\begin{itemize}
+			\item Bu durum, ayrımın tek/az sayıda lineer eksende değil; \textbf{çok boyutlu ve nonlineer} örüntülerde oluştuğunu düşündürür.
+		\end{itemize}
+		\item \textbf{Aykırı örnekler} (x ile işaretli) çoğunlukla bulutun dış bölgelerinde konumlanır:
+		\begin{itemize}
+			\item Ölçekleme/istatistiksel özetleri etkileyerek modele gürültü taşıyabilir,
+			\item Ancak klinik açıdan \textbf{nadir ama gerçek} patoloji örnekleri olabileceği için doğrudan silinmemiş; sonraki adımlarda (varyans filtreleme, RF) sağlam (robust) öğrenme ile ele alınmıştır.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
 \subsection{Ön İşleme}
 
 \begin{frame}{Ön İşleme: Genel Hatlar}
