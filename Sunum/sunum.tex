@@ -386,7 +386,51 @@
 		\item Olasılıksal çıktılar için sınıf bazlı eşikler, F1 skorunu maksimize edecek şekilde 0.01 aralıklarla taranmıştır.
 	\end{itemize}
 \end{frame}
+\begin{frame}{Model Değerlendirme Metrikleri (Tanımlar)}
+	\small
+	\begin{itemize}
+		\item Her sınıf için one-vs-rest ikili senaryo kurulur: ilgili sınıf \emph{pozitif}, diğerleri \emph{negatif}.
+		\item Karışıklık matrisi terimleri:
+		\[
+		\text{TP: doğru pozitif},\quad \text{FP: yanlış pozitif},\quad
+		\text{FN: yanlış negatif},\quad \text{TN: doğru negatif}
+		\]
+		\item \textbf{Accuracy (Doğruluk)} — genel doğru sınıflandırma oranı (dengesiz veri varsa yanıltıcı olabilir):
+		\[
+		\text{Acc}=\frac{TP+TN}{TP+FP+FN+TN}
+		\]
+		\item \textbf{Precision (Kesinlik)} — “pozitif” dediğim örneklerin ne kadarı gerçekten pozitif? (yanlış alarm maliyeti yüksekse önemlidir):
+		\[
+		\text{Prec}=\frac{TP}{TP+FP}
+		\]
+		\item \textbf{Recall / Sensitivity (Duyarlılık)} — gerçek pozitiflerin ne kadarını yakaladım? (kaçırma maliyeti yüksekse önemlidir):
+		\[
+		\text{Rec}=\frac{TP}{TP+FN}
+		\]
+		
+	\end{itemize}
+\end{frame}
 
+\begin{frame}{ROC-AUC, Eşik ve Çok Sınıflı Özetleme}
+	\small
+	\begin{itemize}
+		\item \textbf{F1 skoru} — Precision ve Recall arasında denge (dengesiz sınıflarda sıklıkla tercih edilir):
+		\[
+		\text{F1}= \frac{2\,\text{Prec}\cdot\text{Rec}}{\text{Prec}+\text{Rec}}
+		\]
+		\item \textbf{ROC eğrisi}: eşik \(\tau\) değiştikçe \(\text{TPR}\) ve \(\text{FPR}\) değerlerinin izlediği eğri:
+		\[
+		\text{TPR}(\tau)=\frac{TP(\tau)}{TP(\tau)+FN(\tau)} \quad,\quad
+		\text{FPR}(\tau)=\frac{FP(\tau)}{FP(\tau)+TN(\tau)}
+		\]
+		\item \textbf{AUC}: ROC eğrisinin altında kalan alan; eşikten bağımsız ayrıştırma gücü:
+		\[
+		\text{AUC}=\int_{0}^{1}\text{TPR}(\text{FPR})\,d(\text{FPR})
+		\]
+		
+		\item Bu çalışmada metrikler doğrulama setinde hesaplanmış; sınıf bazlı eşikler \(\tau_c\) F1’i maksimize edecek şekilde taranmış ve en iyi kurulum test setinde raporlanmıştır.
+	\end{itemize}
+\end{frame}
 \begin{frame}{Kodlama Ortamı}
 	\begin{itemize}
 		\item Tüm analiz ve deneyler Python 3 ortamında, açık kaynak kütüphaneler kullanılarak gerçekleştirilmiştir.
@@ -398,13 +442,88 @@
 
 %=================================
 \section{Sonuçlar}
+\begin{frame}{Sınıf Ağırlıkları vs. Undersampling}
+	\begin{columns}[T,onlytextwidth]
+		% --- Left: figure + short commentary ---
+		\begin{column}{0.60\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{../reports/model_comparison/class_weights_distribution.png}
 
-\begin{frame}{Genel Performans (Eğitim / Val)}
+			{\scriptsize
+			\textit{Not: Solda eğitim seti sınıf dağılımı, sağda \texttt{class\_weight="balanced"} ile hesaplanan ağırlıklar gösterilmektedir.}
+
+			\begin{block}{Kısa yorum}
+				\scriptsize
+				\begin{itemize}
+					\item \textbf{Class-weight:} Örnek sayısını değiştirmez; azınlık sınıfların hatasını daha fazla cezalandırarak öğrenmeyi dengeler.
+					\item \textbf{Undersampling:} Çoğunluk sınıfından örnek \emph{atar}; veri boyutunu düşürür ve bilgi kaybı riski taşır.
+				\end{itemize}
+			\end{block}
+			}
+		\end{column}
+		% --- Right: interpretation + formula ---
+		\begin{column}{0.38\textwidth}
+			\small
+			\begin{itemize}
+				\item \textbf{Sol grafik (dağılım):} Eğitim seti dengesizdir; \textbf{NORM} en büyük, \textbf{HYP} en küçük sınıftır.
+				\item \textbf{Sağ grafik (ağırlıklar):} \texttt{balanced} yaklaşımı sınıf sıklığının tersiyle orantılı ağırlık verir:
+				\[
+					w_c \propto \frac{1}{n_c}
+				\]
+				\item Bu nedenle \textbf{NORM} için \(w<1\), \textbf{HYP} için \(w>1\) beklenir (kırmızı çizgi \(1.0\) referansıdır).
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Genel Performans (Eğitim / Val) — Random Forest}
+	\centering
+	\small
+	\setlength{\tabcolsep}{6pt}
+	\renewcommand{\arraystretch}{1.15}
+	\begin{tabular}{lccccc}
+		\toprule
+		\textbf{Kurulum} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{ROC-AUC} \\
+		\midrule
+		RF + Top-50  & 0.5533 & 0.6764 & 0.7653 & 0.7153 & 0.904 \\
+		RF + Top-100 & 0.5843 & 0.7129 & 0.7368 & 0.7239 & 0.909 \\
+		RF + Top-200 & 0.5885 & 0.7130 & 0.7560 & 0.7321 & 0.915 \\
+		RF + Top-200 + Ensemble & 0.5449 & 0.6841 & 0.7859 & 0.7228 & 0.915 \\
+		\bottomrule
+	\end{tabular}
+
+	\vspace{0.25cm}
+	{\scriptsize \textbf{Not:} Ensemble kurulumunda yalnızca Recall yaklaşık \%78.6 olarak raporlanmıştır; diğer metrikler burada verilmemiştir.}
+\end{frame}
+
+\begin{frame}{SVM Sonuçları (Top-200, Class-Weight)}
+	\centering
+	\small
+	\setlength{\tabcolsep}{8pt}
+	\renewcommand{\arraystretch}{1.15}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Sınıf} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{ROC-AUC} \\
+		\midrule
+		NORM & 0.8151 & 0.9107 & 0.8602 & 0.9435 \\
+		MI   & 0.7579 & 0.7400 & 0.7489 & 0.9229 \\
+		STTC & 0.6632 & 0.8464 & 0.7437 & 0.9289 \\
+		CD   & 0.7455 & 0.7500 & 0.7477 & 0.9083 \\
+		HYP  & 0.5714 & 0.7023 & 0.6301 & 0.9049 \\
+		\bottomrule
+	\end{tabular}
+
+	\vspace{0.25cm}
+	{\scriptsize \textbf{Tablo 8.} SVM Top-200 CW modelinin sınıflara göre metrikleri}
+\end{frame}
+
+\begin{frame}{SVM (Top-200, CW) — Kısa Yorum}
+	\small
 	\begin{itemize}
-		\item RF + Top-50: Accuracy \%55.33, Precision \%67.64, Recall \%76.53, F1 \%71.53, ROC-AUC 0.904.
-		\item RF + Top-100: Accuracy \%58.43, Precision \%71.29, Recall \%73.68, F1 \%72.39, ROC-AUC 0.909.
-		\item RF + Top-200: Accuracy \%58.85, Precision \%71.30, Recall \%75.60, F1 \%73.21, ROC-AUC 0.915.
-		\item RF + Top-200 + Ensemble: Recall artarken (yaklaşık \%78.6), doğruluk ve precision bir miktar düşmüş; F1 kazancı sınırlı kalmıştır.
+		\item \textbf{NORM} sınıfı tüm metriklerde en yüksek skorlara sahiptir (\(F1=0.8602\), \(ROC\text{-}AUC=0.9435\)); bu durum sınıf dengesizliği ve NORM’un görece kolay ayrışması ile uyumludur.
+		\item \textbf{HYP} sınıfı en düşük \(F1\) (\(0.6301\)) ve \textbf{Precision} (\(0.5714\)) değerlerini üretmiştir; azınlık sınıf olması nedeniyle modelin doğru pozitif üretmekte zorlandığını göstermektedir.
+		\item \textbf{MI} ve \textbf{CD} sınıfları Precision/Recall açısından daha dengeli olup \(F1 \approx 0.748\) bandındadır.
+		\item \textbf{STTC} için \textbf{Recall} (\(0.8464\)) yüksek, \textbf{Precision} (\(0.6632\)) düşüktür; model STTC’yi iyi yakalarken daha fazla yanlış pozitif üretiyor olabilir.
 	\end{itemize}
 \end{frame}
 
