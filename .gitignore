@@ -35,8 +35,8 @@ results_from_previous_model_archive/
 *.log
 *.bak
 
-# Large processed data files (keep structure, exclude large CSVs)
-data/processed/
+# Local/generated data (do not commit)
+data/
 # Sunum files (not needed for reproduction)
 Sunum/
 
