@@ -55,6 +55,8 @@ PTB-XL+ paper/
    - `ptb-xl/` - PTB-XL dataset
    - `ptb-xl+/` - PTB-XL+ feature dataset
 
+   **Note:** Processed CSV files are not included in the repository. You must run the preprocessing pipeline to generate them.
+
 ## Pipeline & Usage
 
 The project follows a sequential pipeline. Run scripts in order:
